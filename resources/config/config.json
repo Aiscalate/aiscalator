@@ -1,0 +1,13 @@
+{
+    "step" : {
+        "name" :        "notebook1",
+        "type" :        "jupyter",
+        "path" :        "resources/notebook1/code.ipynb",
+        "requirements" :"resources/notebook1/requirements.txt",
+        "dockerfile" :  "resources/docker/ds.conf",
+        "parameters" : [ ],
+        "volume" : [
+                        "resources/data/data1/"
+        ]
+    }
+}
