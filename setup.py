@@ -11,6 +11,15 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
+import os
+ROOT_DIR = os.getenv('VIRTUAL_ENV', None) + '/etc/aiscalator/'
+if ROOT_DIR is None:
+    ROOT_DIR = os.getenv('HOME') + '.aiscalator/'
+data_files = [
+    (ROOT_DIR + 'config', ['resources/config/logging.yaml']),
+    (ROOT_DIR + 'docker', ['resources/docker/spark_template.conf'])
+]
+
 requirements = ['Click>=6.0', ]
 
 setup_requirements = ['pytest-runner', ]
@@ -46,6 +55,7 @@ setup(
     keywords='aiscalator',
     name='aiscalator',
     packages=find_packages(include=['aiscalator']),
+    data_files=data_files,
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,

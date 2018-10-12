@@ -48,8 +48,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'aiscalator'
-copyright = u"2018, Chritstophe Duong"
-author = u"Chritstophe Duong"
+copyright = u"2018, Christophe Duong"
+author = u"Christophe Duong"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -84,7 +84,7 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = 'nature'
 
 # Theme options are theme-specific and customize the look and feel of a
 # theme further.  For a list of options available for each theme, see the
@@ -130,7 +130,7 @@ latex_elements = {
 latex_documents = [
     (master_doc, 'aiscalator.tex',
      u'aiscalator Documentation',
-     u'Chritstophe Duong', 'manual'),
+     u'Christophe Duong', 'manual'),
 ]
 
 

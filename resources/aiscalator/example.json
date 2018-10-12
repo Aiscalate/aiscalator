@@ -1,0 +1,46 @@
+{
+"_"  : "An Aiscalator is a collection of steps to run...",
+"__" : "Here we define all possible steps to execute",
+    "step" : [
+        {
+"0_" : "******************************************************",
+"_0_": "* Aiscalator's Metadata for this particular step     *",
+"_0" : "******************************************************",
+            "name" :        "notebook1",
+            "description" : "This notebook is the example from the papermill tutorial from nteract: https://github.com/nteract/papermill/tree/master/binder",
+            "tags" : ["example", "papermill"],
+
+"1_" : "******************************************************",
+"_1_": "* Static Configuration of the Docker Image to build  *",
+"__1": "* (list of needed software, packages and misc config)*",
+"_1" : "******************************************************",
+            "dockerImageName" : "aiscalate/spark_step",
+            "dockerfile" :  "spark_template.conf",
+            "requirementsPath" :"../config/requirements.txt",
+
+"3_" : "******************************************************",
+"_3_": "* Code to run as part of this step with parameters   *",
+"_3" : "******************************************************",
+            "type" :        "jupyter",
+            "path" :        "../step/notebook1/code.ipynb",
+            "executionDirPath" : "../../build/step/notebook1",
+            "parameters" : [
+                { "start_date" : "2011-01-01" },
+                { "stop_date"  : "2014-02-02" }
+            ],
+            "inputPath"  : [ ],
+            "outputPath" : [ ],
+            "modulesPath": [ ]
+        }
+    ],
+
+"___" : "Pipeline definition: sequences of steps to execute",
+    "pipeline" : [
+
+    ],
+
+"____" : "Scheduling configuration of pipelines",
+    "cron" : [
+
+    ]
+}
