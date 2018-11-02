@@ -25,5 +25,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: ChristopheDuong/aiscalator
+    repo: Aiscalate/aiscalator
     python: 3.6

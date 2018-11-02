@@ -1,7 +1,6 @@
 from logging import info, debug
 from os import chdir, getcwd, makedirs
 from os.path import basename, dirname, abspath
-from re import search
 from shutil import copy
 from tempfile import TemporaryDirectory
 from time import sleep
@@ -9,26 +8,24 @@ import webbrowser
 
 from .utils import copy_replace, subprocess_run
 from .config import find_global_config_file, AiscalatorConfig
-
-
-class DockerLogAnalyzer(object):
-
-    def __init__(self, pattern=None):
-        self.artifact = "latest"
-        self.pattern = pattern
-
-# https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
-    def log_docker_build(self, pipe):
-        for line in iter(pipe.readline, b''):  # b'\n'-separated lines
-            # TODO improve logging in its own subprocess log file?
-            info(line)
-            if self.pattern is not None:
-                m = search(self.pattern, line)
-                if m:
-                    self.artifact = m.group(1).decode("utf-8")
+from .log_regex_analyzer import LogRegexAnalyzer
 
 
 def docker_build(step: AiscalatorConfig):
+    """
+    Builds the docker image following the parameters specified in the
+    focused step's configuration file
+
+    Parameters
+    ----------
+    step : AiscalatorConfig
+        Configuration object for this step
+
+    Returns
+    -------
+    string
+        the docker artifact name of the image built
+    """
     # Retrieve configuration parameters
     dockerfilename = step.step_field('dockerfile')
     if dockerfilename is None:
@@ -54,10 +51,10 @@ RUN rm requirements.txt"""
             chdir(tmp)
             debug("Running...: docker build --rm -t " +
                   docker_image_name + " .")
-            logger = DockerLogAnalyzer(b'Successfully built (\w+)\n')
+            logger = LogRegexAnalyzer(b'Successfully built ([a-zA-Z0-9]+)\n')
             subprocess_run([
                 "docker", "build", "--rm", "-t", docker_image_name, "."
-            ], log_function=logger.log_docker_build)
+            ], log_function=logger.grep_logs)
             result = logger.artifact
     finally:
         chdir(cwd)
@@ -65,6 +62,29 @@ RUN rm requirements.txt"""
 
 
 def prepare_docker_run_notebook(step: AiscalatorConfig, program):
+    """
+    Assembles the list of commands to execute a docker run call
+
+    When calling "docker run ...", this function also adds a set of
+    additional parameters to mount the proper volumes and expose the
+    correct environment for the call in the docker image mapped to the
+    host directories. This is done so only some specific data and code
+    folders are accessible within the docker image.
+
+    Parameters
+    ----------
+    step : AiscalatorConfig
+        Configuration object for the step
+    program : List
+        the rest of the commands to execute as part of
+        the docker run call
+
+    Returns
+    -------
+    List
+        The full Array of Strings representing the commands to execute
+        in the docker run call
+    """
     commands = [
         "docker", "run", "--name", step.container_name(), "--rm",
         "-p", "10000:8888",
@@ -114,6 +134,23 @@ def prepare_docker_run_notebook(step: AiscalatorConfig, program):
 
 
 def docker_run_papermill(step: AiscalatorConfig, prepare_only=False):
+    """
+    Executes the step in browserless mode using papermill
+
+    Parameters
+    ----------
+    step : AiscalatorConfig
+        Configuration object for the step
+    prepare_only : bool
+        Indicates if papermill should replace the parameters of the
+        notebook only or it should execute all the cells too
+
+    Returns
+    -------
+    string
+        the path to the output notebook resulting from the execution
+        of this step
+    """
     docker_image = docker_build(step)
     notebook = ("/home/jovyan/work/notebook/" +
                 basename(step.file_path('path')))
@@ -131,14 +168,27 @@ def docker_run_papermill(step: AiscalatorConfig, prepare_only=False):
     if prepare_only:
         commands.append("--prepare-only")
     commands += parameters
-    logger = DockerLogAnalyzer()
+    logger = LogRegexAnalyzer()
     # TODO output log in its own execution log file
-    subprocess_run(commands, log_function=logger.log_docker_build)
+    subprocess_run(commands, log_function=logger.grep_logs)
     # TODO handle notebook_output execution history and latest successful run
     return notebook_output
 
 
 def docker_run_lab(step: AiscalatorConfig):
+    """
+    Starts a Jupyter Lab environment configured to edit the focused step
+
+    Parameters
+    ----------
+    step : AiscalatorConfig
+        Configuration object for the step
+
+    Returns
+    -------
+    string
+        Url of the running jupyter lab
+    """
     docker_image = docker_build(step)
     # TODO: shutdown other jupyter lab still running
     notebook = basename(step.step_field('path'))
@@ -153,8 +203,8 @@ def docker_run_lab(step: AiscalatorConfig):
     commands = prepare_docker_run_notebook(step, commands + [
         docker_image, "start.sh", 'jupyter', 'lab'
     ])
-    logger = DockerLogAnalyzer(b'http://.*:8888/\?token=(\w+)\n')
-    subprocess_run(commands, log_function=logger.log_docker_build, wait=False)
+    logger = LogRegexAnalyzer(b'http://.*:8888/.token=([a-zA-Z0-9]+)\n')
+    subprocess_run(commands, log_function=logger.grep_logs, wait=False)
     for i in range(5):
         sleep(2)
         if logger.artifact != "latest":

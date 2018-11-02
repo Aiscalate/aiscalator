@@ -13,12 +13,12 @@ aiscalator
         :target: https://aiscalator.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://requires.io/github/aiscalate/aiscalator/requirements.svg?branch=master
-        :target: https://requires.io/github/aiscalate/aiscalator/requirements/?branch=master
+.. image:: https://requires.io/github/Aiscalate/aiscalator/requirements.svg?branch=master
+        :target: https://requires.io/github/Aiscalate/aiscalator/requirements/?branch=master
         :alt: Requirements Status
 
 
-Aiscalate Command Line Tool
+The Command Line Interface to Aiscalate your data pipelines.
 
 
 * Free software: MIT license

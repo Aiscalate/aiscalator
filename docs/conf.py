@@ -32,7 +32,12 @@ import aiscalator
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.viewcode', 'numpydoc']
+
+# Whether to create a Sphinx table of contents for the lists of class methods
+# and attributes. If a table of contents is made, Sphinx expects each entry
+# to have a separate page. True by default.
+numpydoc_class_members_toctree = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
