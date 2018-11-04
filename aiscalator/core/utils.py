@@ -72,20 +72,28 @@ class BackgroundThreadRunner(object):
         Process object of the command running in the background
     log_function : function(stream -> bool)
         callback function to log the output of the command
+    no_redirect : bool
+        whether the subprocess STDOUT and STDERR should be redirected to logs
     worker : Thread
         Thread object
     """
-    def __init__(self, command, log_function):
-        self.process = Popen(command, stdout=PIPE, stderr=STDOUT)
+    def __init__(self, command, log_function, no_redirect=False):
+        self.no_redirect = no_redirect
+        if no_redirect:
+            self.process = Popen(command)
+        else:
+            self.process = Popen(command, stdout=PIPE, stderr=STDOUT)
         self.log_function = log_function
         self.worker = Thread(name='worker', target=self.run)
         self.worker.start()
 
     def run(self):
-        self.log_function(self.process.stdout)
+        if not self.no_redirect:
+            self.log_function(self.process.stdout)
 
 
-def subprocess_run(command, log_function=log_info, wait=True):
+def subprocess_run(command, log_function=log_info,
+                   no_redirect=False, wait=True):
     """
     Run command in a subprocess while redirecting output to log_function.
 
@@ -98,6 +106,8 @@ def subprocess_run(command, log_function=log_info, wait=True):
         Command to run in the subprocess
     log_function : function
         Callback function to log the output of the subprocess
+    no_redirect : bool
+        whether the subprocess STDOUT and STDERR should be redirected to logs
     wait : bool
         Whether the subprocess should be run synchroneously or in
         the background
@@ -109,9 +119,12 @@ def subprocess_run(command, log_function=log_info, wait=True):
         the thread running in the background
     """
     if wait:
-        process = Popen(command, stdout=PIPE, stderr=STDOUT)
-        with process.stdout:
-            log_function(process.stdout)
+        if no_redirect:
+            process = Popen(command)
+        else:
+            process = Popen(command, stdout=PIPE, stderr=STDOUT)
+            with process.stdout:
+                log_function(process.stdout)
         return process.wait()
     else:
-        return BackgroundThreadRunner(command, log_function)
+        return BackgroundThreadRunner(command, log_function, no_redirect)

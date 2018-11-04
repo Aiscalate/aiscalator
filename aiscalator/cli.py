@@ -8,42 +8,33 @@ this module defines all the entry points to the application.
 """
 import sys
 import click
-from .config import AiscalatorConfig
-from .docker_command import docker_run_lab, docker_run_papermill
+
+from aiscalator import __version__
+from aiscalator.airflow import cli as airflow_cli
+from aiscalator.jupyter import cli as jupyter_cli
 
 
 @click.group()
+@click.version_option(version=__version__)
 def main():
     """ Command Line Interface to Aiscalate your data pipelines """
     pass
 
 
 @main.command()
-@click.argument('conf')
-@click.argument('notebook')
-# TODO add parameters override from CLI
-def edit(conf, notebook):
-    """Start an environment to edit step's code"""
-    click.echo(docker_run_lab(AiscalatorConfig(conf, notebook)))
+def version():
+    """Show the version and exit."""
+    click.echo(sys.argv[0] + ', version ' + __version__)
 
 
-@main.command()
-@click.argument('conf')
-@click.argument('notebook')
-# TODO add parameters override from CLI
-def run(conf, notebook):
-    """Run step's code without GUI"""
-    # TODO run multiple notebooks
-    # we have to stage notebooks with same dockerfile together,
-    # merge their requirements so that groups of notebooks can be
-    # run together in the same container sequentially
-    click.echo(docker_run_papermill(AiscalatorConfig(conf, notebook)))
-
+main.add_command(airflow_cli.airflow)
+main.add_command(jupyter_cli.jupyter)
 
 # TODO - pull run docker pull to download all images that might be needed
 
 # TODO - startproject command like cookiecutter to easily start a new
 # TODO pipeline/step
+
 # TODO - store config file path globally with an alias
 # TODO and use those shorter alias for easier commands
 # TODO - list steps/pipelines/data/etc

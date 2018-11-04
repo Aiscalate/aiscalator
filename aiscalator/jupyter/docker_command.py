@@ -1,3 +1,6 @@
+"""
+Implementations of commands for Jupyter
+"""
 from logging import info, debug
 from os import chdir, getcwd, makedirs
 from os.path import basename, dirname, abspath
@@ -6,9 +9,9 @@ from tempfile import TemporaryDirectory
 from time import sleep
 import webbrowser
 
-from .utils import copy_replace, subprocess_run
-from .config import find_global_config_file, AiscalatorConfig
-from .log_regex_analyzer import LogRegexAnalyzer
+from aiscalator.core.utils import copy_replace, subprocess_run
+from aiscalator.core.config import find_global_config_file, AiscalatorConfig
+from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
 
 
 def docker_build(step: AiscalatorConfig):
@@ -27,10 +30,13 @@ def docker_build(step: AiscalatorConfig):
         the docker artifact name of the image built
     """
     # Retrieve configuration parameters
+    # TODO check validity of dockerfilename (choice are jupyter-spark)
     dockerfilename = step.step_field('dockerfile')
     if dockerfilename is None:
-        dockerfilename = "spark_template.conf"
-    dockerfile = find_global_config_file("docker/" + dockerfilename)
+        dockerfilename = "jupyter-spark"
+    dockerfile = find_global_config_file(
+        "config/docker/" + dockerfilename + "/Dockerfile"
+    )
     docker_image_name = step.step_field('dockerImageName')
     requirements = step.file_path('requirementsPath')
     cwd = getcwd()
@@ -88,6 +94,7 @@ def prepare_docker_run_notebook(step: AiscalatorConfig, program):
     commands = [
         "docker", "run", "--name", step.container_name(), "--rm",
         "-p", "10000:8888",
+        "-p", "4040:4040"
      ]
     # TODO improve port publishing
     filename = (step.file_path('path'))
@@ -212,7 +219,7 @@ def docker_run_lab(step: AiscalatorConfig):
         info("docker run does not seem to be up yet... retrying ("
              + str(i) + "/5)")
     if logger.artifact != "latest":
-        # TODO handle url better (not always localhost)
+        # TODO handle url better (not always localhost?)
         url = ("http://localhost:10000/lab/tree/work/notebook/" +
                notebook + "?token=" +
                logger.artifact)

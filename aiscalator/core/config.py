@@ -7,10 +7,14 @@ from pytz import timezone
 
 from platform import uname
 from yaml import safe_load
-from . import __version__
+from aiscalator import __version__
 
 
-from .utils import find
+from aiscalator.core.utils import find
+
+
+def find_user_config_file(filename):
+    return os.path.expanduser("~") + '/.aiscalator/' + filename
 
 
 def find_global_config_file(filename, setup=(lambda x: x), env_key=""):
@@ -45,12 +49,12 @@ def find_global_config_file(filename, setup=(lambda x: x), env_key=""):
         # from the development folder
         "resources",
         # from user home
-        os.path.expanduser("~") + '.aiscalator/',
+        # os.path.expanduser("~") + '/.aiscalator/',
         # from virtual environment install
         os.getenv('VIRTUAL_ENV', '') + '/etc/aiscalator/'
     ]:
         try:
-            path = os.path.join(loc, filename)
+            path = os.path.abspath(os.path.join(loc, filename))
             with open(path, 'rt') as f:
                 setup(f)
             return path
@@ -132,6 +136,8 @@ class AiscalatorConfig(object):
             if not self.rootDir.endswith("/"):
                 self.rootDir += "/"
         setup_logging()
+        # TODO find user config, if not found then
+        # find global config and create one for the user
         find_global_config_file(
             "config/config.json", self.setup_app_config, "AISCALATOR_CONFIG"
         )
@@ -166,16 +172,16 @@ class AiscalatorConfig(object):
         result = None
         if self.config_path is None:
             return None
-        if notebook is None:
+        if notebook is None or len(notebook) == 0:
             result = self.conf['step'][0]
         else:
-            step = find(self.conf['step'], notebook)
+            step = find(self.conf['step'], notebook[0])
             if step is not None:
                 result = step
             elif notebook == "_":
                 result = self.conf['step'][0]
         if result is None:
-            raise ValueError("Unknown step " + notebook)
+            raise ValueError("Unknown step " + notebook[0])
         return result
 
     def notebook_output_path(self, notebook):
