@@ -3,7 +3,7 @@ Implementations of commands for Jupyter
 """
 from logging import info, debug
 from os import chdir, getcwd, makedirs
-from os.path import basename, dirname, abspath
+from os.path import basename, dirname, abspath, isfile
 from shutil import copy
 from tempfile import TemporaryDirectory
 from time import sleep
@@ -96,6 +96,9 @@ def prepare_docker_run_notebook(step: AiscalatorConfig, program):
         "-p", "10000:8888",
         "-p", "4040:4040"
      ]
+    for env in step.user_env_file():
+        if isfile(env):
+            commands += ["--env-file", env]
     # TODO improve port publishing
     filename = (step.file_path('path'))
     commands += [

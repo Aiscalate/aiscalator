@@ -66,7 +66,7 @@ setup(
     license="MIT license",
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='aiscalator',
+    keywords='data science jupyter notebook prototype data engineering product airflow',
     name='aiscalator',
     packages=find_packages(),
     data_files=data_files,

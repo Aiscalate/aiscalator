@@ -2,8 +2,34 @@
 Implementations of commands for Airflow
 """
 import logging
-from aiscalator.core.config import AiscalatorConfig, find_user_config_file
+import os
+from aiscalator.core.config import AiscalatorConfig
 from aiscalator.core.utils import subprocess_run
+
+
+def docker_compose(conf: AiscalatorConfig):
+    """
+    Prepare a docker-compose command
+
+    Parameters
+    ----------
+    conf : AiscalatorConfig
+       Configuration object for the application
+    Returns
+    -------
+    List
+        The array of commands to start a docker-compose
+        with the proper parameters
+    """
+    dockerfile = conf.find_user_config_file(
+        "config/docker-compose-CeleryExecutor.yml"
+    )
+    commands = ["docker-compose"]
+    for env in conf.user_env_file():
+        if os.path.isfile(env):
+            commands += ["--env-file", env]
+    commands += ["-f", dockerfile]
+    return commands
 
 
 def airflow_setup(conf: AiscalatorConfig):
@@ -33,14 +59,7 @@ def airflow_up(conf: AiscalatorConfig):
         Configuration object for the application
 
     """
-    dockerfile = find_user_config_file(
-        "config/docker-compose-CeleryExecutor.yml"
-    )
-    commands = [
-        "docker-compose", "-f",
-        dockerfile,
-        "up", "-d"
-    ]
+    commands = docker_compose(conf) + ["up", "-d"]
     subprocess_run(commands, no_redirect=True)
 
 
@@ -54,14 +73,7 @@ def airflow_down(conf: AiscalatorConfig):
         Configuration object for the application
 
     """
-    dockerfile = find_user_config_file(
-        "config/docker-compose-CeleryExecutor.yml"
-    )
-    commands = [
-        "docker-compose", "-f",
-        dockerfile,
-        "down"
-    ]
+    commands = docker_compose(conf) + ["down"]
     subprocess_run(commands, no_redirect=True)
 
 
@@ -78,12 +90,7 @@ def airflow_cmd(conf: AiscalatorConfig, service="webserver", cmd=None):
     cmd : list
         subcommands to run
     """
-    dockerfile = find_user_config_file(
-        "config/docker-compose-CeleryExecutor.yml"
-    )
-    commands = [
-        "docker-compose", "-f",
-        dockerfile,
+    commands = docker_compose(conf) + [
         "run", "--rm", service,
     ]
     if cmd is not None:

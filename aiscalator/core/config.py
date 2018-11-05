@@ -13,10 +13,6 @@ from aiscalator import __version__
 from aiscalator.core.utils import find
 
 
-def find_user_config_file(filename):
-    return os.path.expanduser("~") + '/.aiscalator/' + filename
-
-
 def find_global_config_file(filename, setup=(lambda x: x), env_key=""):
     """Looks for configuration files and run the setup function with it:
 
@@ -119,20 +115,20 @@ class AiscalatorConfig(object):
     step : string
         step name the application is currently focusing on
     """
-    def __init__(self, config_path=None, notebook=None):
+    def __init__(self, step_config_path=None, notebook=None):
         """
         Parameters
             ----------
-            config_path : string
+            step_config_path : string
                 path to the step configuration file
             notebook : string
                 name of the step from the configuration file to focus on
         """
-        self.config_path = config_path
-        if config_path is None:
+        self.config_path = step_config_path
+        if step_config_path is None:
             self.rootDir = None
         else:
-            self.rootDir = os.path.dirname(config_path)
+            self.rootDir = os.path.dirname(step_config_path)
             if not self.rootDir.endswith("/"):
                 self.rootDir += "/"
         setup_logging()
@@ -183,6 +179,37 @@ class AiscalatorConfig(object):
         if result is None:
             raise ValueError("Unknown step " + notebook[0])
         return result
+
+    def find_user_config_file(self, filename):
+        """
+        Looks for configuration files in the user configuration folder
+
+        Parameters
+        ----------
+        filename : string
+            file to search for
+
+        Returns
+        -------
+        string
+            path to the filename in the user configuration folder
+        """
+        # TODO check user_config_folder override in environment
+        # TODO check if user_config_folder has been redefined on command line
+        return os.path.expanduser("~") + '/.aiscalator/' + filename
+
+    def user_env_file(self):
+        """
+        Find a list of env files to pass to docker containers
+
+        Returns
+        -------
+        List
+            env files
+        """
+        # TODO look if env file has been defined in the focused step
+        # TODO look in user config if env file has been redefined
+        return [ self.find_user_config_file("config/.env") ]
 
     def notebook_output_path(self, notebook):
         """Generates the name of the output notebook"""
