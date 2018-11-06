@@ -21,7 +21,7 @@ aiscalator
 The Command Line Interface to Aiscalate your data pipelines.
 
 
-* Free software: MIT license
+* Free software: Apache Software License 2.0
 * Documentation: https://aiscalator.readthedocs.io.
 
 
