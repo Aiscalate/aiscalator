@@ -1,5 +1,5 @@
 ==========
-aiscalator
+AIscalator
 ==========
 
 
@@ -18,22 +18,94 @@ aiscalator
         :alt: Requirements Status
 
 
-The Command Line Interface to Aiscalate your data pipelines.
-
-
 * Free software: Apache Software License 2.0
+* Website: http://www.aiscalate.com
 * Documentation: https://aiscalator.readthedocs.io.
 
 
-Features
---------
+Key Features
+------------
 
-* TODO
+Aiscalator is a toolbox to enable your team streamlining
+processes from innovation to productization with:
 
-Credits
+* Jupyter workbench
+    * Explore Data, Prototype Solutions
+* Docker wrapper tools
+    * Share Code, Deploy Reproducible Environments
+* Airflow machinery
+    * Schedule Tasks, Refine Products
+* Data Science and Data Engineering best practices
+
+.. image:: aiscalator_process.png
+        :target: https://raw.githubusercontent.com/Aiscalate/aiscalator/master/resources/img/aiscalator_process.png
+        :align: center
+
+===========
+Quick Start
+===========
+
+Installation
+------------
+
+Test if prerequisite softwares are installed:
+
+.. code-block:: shell
+
+    docker --version
+    docker-compose --version
+    pip --version
+
+Install AIscalator tool:
+
+.. code-block:: shell
+
+    pip install aiscalator
+
+Download docker image to run Jupyter:
+
+.. code-block:: shell
+
+    aiscalator jupyter setup
+
+Download docker image to run Airflow:
+
+.. code-block:: shell
+
+    aiscalator airflow setup
+
+Jupyter
 -------
 
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+Create a new Jupyter notebook to work on, define corresponding aiscalator step:
 
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+.. code-block:: shell
+
+    aiscalator jupyter new
+
+Run the step without GUI:
+
+.. code-block:: shell
+
+    aiscalator jupyter run <aiscalator step>
+
+Airflow
+-------
+
+Start Airflow services:
+
+.. code-block:: shell
+
+    aiscalator airflow start
+
+Create a new AIscalator job, define the airflow DAG:
+
+.. code-block:: shell
+
+    aiscalator airflow new
+
+Schedule AIscalator job:
+
+.. code-block:: shell
+
+    aiscalator airflow push <aiscalator DAG>

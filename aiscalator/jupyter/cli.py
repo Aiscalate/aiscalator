@@ -42,7 +42,7 @@ def setup():
 
 
 @jupyter.command()
-def create():
+def new():
     """Create a new notebook file with a new aiscalate config."""
     # TODO: ask questions and generates json + ipynb files
     # TODO: afterward edit the newly created step

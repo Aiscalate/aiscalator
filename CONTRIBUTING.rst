@@ -19,9 +19,26 @@ Report bugs at https://github.com/aiscalate/aiscalator/issues
 
 If you are reporting a bug, please include:
 
-* Your operating system name and version.
-* Any details about your local setup that might be helpful in troubleshooting.
-* Detailed steps to reproduce the bug.
+* aiscalator version:
+* Python version:
+* Operating System:
+
+Description
+
+Describe what you were trying to get done.
+Tell us what happened, what went wrong, and what you expected to happen.
+
+What I Did::
+
+    Paste the command(s) you ran and the output.
+    If there was a crash, please include the traceback here.
+
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
+
+**Additional context**
+Add any other context about the problem here.
+
 
 Fix Bugs
 ~~~~~~~~
@@ -50,9 +67,11 @@ The best way to send feedback is to file an issue at https://github.com/aiscalat
 If you are proposing a feature:
 
 * Explain in detail how it would work.
+* Describe alternatives you've considered
 * Keep the scope as narrow as possible, to make it easier to implement.
 * Remember that this is a volunteer-driven project, and that contributions
   are welcome :)
+
 
 Get Started!
 ------------
@@ -101,7 +120,7 @@ Before you submit a pull request, check that it meets these guidelines:
 1. The pull request should include tests.
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
-   feature to the list in README.rst.
+   feature to the list in FEATURES.rst.
 3. The pull request should work for Python 2.7, 3.4, 3.5 and 3.6, and for PyPy. Check
    https://travis-ci.org/Aiscalate/aiscalator/pull_requests
    and make sure that the tests pass for all supported Python versions.

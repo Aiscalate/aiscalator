@@ -1,5 +1,5 @@
-Welcome to aiscalator's documentation!
-======================================
+AIscalator's documentation
+==========================
 
 .. toctree::
    :maxdepth: 2
@@ -8,8 +8,10 @@ Welcome to aiscalator's documentation!
    readme
    installation
    usage
+   features
    modules
    contributing
+   codeofconduct
    authors
    history
 

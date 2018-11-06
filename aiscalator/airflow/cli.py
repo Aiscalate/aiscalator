@@ -18,6 +18,8 @@
 CLI module for Airflow related commands.
 """
 import click
+import logging
+
 from aiscalator import __version__
 from aiscalator.core.config import AiscalatorConfig
 from aiscalator.airflow import airflow_command
@@ -66,3 +68,27 @@ def run(service, subcommand):
 
 # TODO CLI to  scale celery workers
 # docker-compose -f docker-compose-CeleryExecutor.yml scale worker=5
+
+
+@airflow.command()
+def new():
+    """Create a new DAG job"""
+    # TODO to implement
+    logging.error("Not implemented yet")
+    pass
+
+
+@airflow.command()
+def edit():
+    """Edit DAG job"""
+    # TODO to implement
+    logging.error("Not implemented yet")
+    pass
+
+
+@airflow.command()
+def push():
+    """Push a job into the DAGS folder to schedule in Airflow."""
+    # TODO to implement
+    logging.error("Not implemented yet")
+    pass
