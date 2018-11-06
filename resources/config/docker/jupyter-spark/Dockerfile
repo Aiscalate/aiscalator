@@ -2,17 +2,14 @@
 FROM jupyter/all-spark-notebook:latest
 LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
 
+COPY install-jupytext.sh /home/jovyan/install-jupytext.sh
+
 RUN pip install --upgrade pip \
     && pip install papermill \
-    && pip install flake8
-
-RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-
-ENV NVM_DIR "${HOME}/.nvm"
-
-RUN . $NVM_DIR/nvm.sh \
-    && nvm install --lts \
-    && jupyter labextension install @jupyterlab/celltags
+    && pip install flake8 \
+    && pip install jupytext \
+    && jupyter labextension install @jupyterlab/celltags \
+    && bash /home/jovyan/install-jupytext.sh
 
 # optional additional requirements.txt:
 #requirements.txt#

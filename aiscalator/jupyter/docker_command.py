@@ -2,8 +2,8 @@
 Implementations of commands for Jupyter
 """
 from logging import info, debug
-from os import chdir, getcwd, makedirs
-from os.path import basename, dirname, abspath, isfile
+from os import chdir, getcwd, makedirs, listdir
+from os.path import basename, dirname, abspath, isfile, join
 from shutil import copy
 from tempfile import TemporaryDirectory
 from time import sleep
@@ -34,9 +34,9 @@ def docker_build(step: AiscalatorConfig):
     dockerfilename = step.step_field('dockerfile')
     if dockerfilename is None:
         dockerfilename = "jupyter-spark"
-    dockerfile = find_global_config_file(
+    dockerfiledir = dirname(find_global_config_file(
         "config/docker/" + dockerfilename + "/Dockerfile"
-    )
+    ))
     docker_image_name = step.step_field('dockerImageName')
     requirements = step.file_path('requirementsPath')
     cwd = getcwd()
@@ -45,7 +45,8 @@ def docker_build(step: AiscalatorConfig):
         with TemporaryDirectory(prefix="aiscalator_") as tmp:
             # copy the dockerfile
             if requirements is not None:
-                copy_replace(dockerfile, tmp + '/Dockerfile',
+                copy_replace(dockerfiledir + "/Dockerfile",
+                             tmp + '/Dockerfile',
                              '#requirements.txt#', """
 COPY requirements.txt requirements.txt
 RUN pip install -r requirements.txt
@@ -53,7 +54,10 @@ RUN rm requirements.txt"""
                              )
                 copy(requirements, tmp + '/requirements.txt')
             else:
-                copy(dockerfile, tmp + '/Dockerfile')
+                copy(dockerfiledir + "/Dockerfile", tmp + '/Dockerfile')
+            for f in listdir(dockerfiledir):
+                if f != "Dockerfile":
+                    copy(join(dockerfiledir, f), join(tmp, f))
             chdir(tmp)
             debug("Running...: docker build --rm -t " +
                   docker_image_name + " .")

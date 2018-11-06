@@ -20,6 +20,8 @@ data_files = [
      ['resources/config/logging.yaml']),
     (ROOT_DIR + 'config/docker/jupyter-spark/',
      ['resources/config/docker/jupyter-spark/Dockerfile']),
+    (ROOT_DIR + 'config/docker/jupyter-spark/',
+     ['resources/config/docker/jupyter-spark/install-jupytext.sh']),
     (ROOT_DIR + 'config/docker/airflow/',
      ['resources/config/docker/airflow/Dockerfile']),
     (ROOT_DIR + 'config/docker/airflow/config',

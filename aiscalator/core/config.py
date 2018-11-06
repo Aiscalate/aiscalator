@@ -45,7 +45,7 @@ def find_global_config_file(filename, setup=(lambda x: x), env_key=""):
         # from the development folder
         "resources",
         # from user home
-        # os.path.expanduser("~") + '/.aiscalator/',
+        os.path.expanduser("~") + '/.aiscalator/',
         # from virtual environment install
         os.getenv('VIRTUAL_ENV', '') + '/etc/aiscalator/'
     ]:
@@ -209,7 +209,7 @@ class AiscalatorConfig(object):
         """
         # TODO look if env file has been defined in the focused step
         # TODO look in user config if env file has been redefined
-        return [ self.find_user_config_file("config/.env") ]
+        return [self.find_user_config_file("config/.env")]
 
     def notebook_output_path(self, notebook):
         """Generates the name of the output notebook"""
