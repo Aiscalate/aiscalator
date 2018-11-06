@@ -1,4 +1,3 @@
-# VERSION '0.0.2'
 # AUTHOR: Christophe Duong <chris@aiscalate.com>
 # DESCRIPTION: Airflow container tuned for AIscalator
 # BUILD: docker build --build-arg DOCKER_GID=`getent group docker | cut -d ':' -f 3` --rm -t aiscalator/airflow .

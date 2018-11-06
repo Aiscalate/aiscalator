@@ -25,8 +25,8 @@ from tempfile import TemporaryDirectory
 from time import sleep
 import webbrowser
 
-from aiscalator.core.utils import copy_replace, subprocess_run
-from aiscalator.core.config import find_global_config_file, AiscalatorConfig
+from aiscalator.core.utils import copy_replace, subprocess_run, data_file
+from aiscalator.core.config import AiscalatorConfig
 from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
 
 
@@ -50,9 +50,7 @@ def docker_build(step: AiscalatorConfig):
     dockerfilename = step.step_field('dockerfile')
     if dockerfilename is None:
         dockerfilename = "jupyter-spark"
-    dockerfiledir = dirname(find_global_config_file(
-        "config/docker/" + dockerfilename + "/Dockerfile"
-    ))
+    dockerfiledir = data_file("../config/docker/" + dockerfilename)
     docker_image_name = step.step_field('dockerImageName')
     requirements = step.file_path('requirementsPath')
     cwd = getcwd()

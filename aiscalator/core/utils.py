@@ -15,8 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from logging import info
+import os
 from threading import Thread
 from subprocess import Popen, PIPE, STDOUT
+
+
+def data_file(path):
+    return os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
 
 
 def find(collection, item, field='name'):

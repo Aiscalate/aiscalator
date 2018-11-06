@@ -24,64 +24,15 @@ from pytz import timezone
 from platform import uname
 from yaml import safe_load
 from aiscalator import __version__
-
-
-from aiscalator.core.utils import find
-
-
-def find_global_config_file(filename, setup=(lambda x: x), env_key=""):
-    """Looks for configuration files and run the setup function with it:
-
-    This function will try to find the configuration filename at multiple
-    locations:
-
-        - From environment variable specified as env_key
-        - From the development source tree: resources/
-        - From user's home directory: ~/.aiscalator/
-        - From virtual environment installation folder of data_files as
-          specified in the setup.py
-
-    Parameters
-    ----------
-    filename : string
-        filename of the configuration file to find
-    setup : function(x -> x)
-        callback function to run with the valid configuration file found
-    env_key : string
-        environment variable name pointing to configuration file to load
-
-    Returns
-    -------
-    string
-        The path of the configuration that was found
-    """
-    for loc in [
-        # from the environment variables
-        os.environ.get(env_key, ''),
-        # from the development folder
-        "resources",
-        # from user home
-        os.path.expanduser("~") + '/.aiscalator/',
-        # from virtual environment install
-        os.getenv('VIRTUAL_ENV', '') + '/etc/aiscalator/'
-    ]:
-        try:
-            path = os.path.abspath(os.path.join(loc, filename))
-            with open(path, 'rt') as f:
-                setup(f)
-            return path
-        except IOError:
-            pass
-    setup(None)
-    return None
+from aiscalator.core.utils import find, data_file
 
 
 def setup_logging():
     """ Setup the logging configuration of the application """
     log_level = os.getenv('AISCALATOR_LOG_LEVEL', None)
-    path = find_global_config_file(
-        "config/logging.yaml", load_logging_conf, 'AISCALATOR_LOG_FILE'
-    )
+
+    with open(data_file("../config/logging.yaml"), 'rt') as f:
+        path = load_logging_conf(f)
     if path is None:
         logging.basicConfig(level=logging.INFO)
     if log_level is not None:
@@ -98,6 +49,8 @@ def load_logging_conf(file):
         os.makedirs('/tmp/aiscalator/log', exist_ok=True)
         conf = safe_load(file.read())
         config.dictConfig(conf)
+        return file
+    return None
 
 
 def generate_global_config():
@@ -148,18 +101,18 @@ class AiscalatorConfig(object):
             if not self.rootDir.endswith("/"):
                 self.rootDir += "/"
         setup_logging()
-        # TODO find user config, if not found then
-        # find global config and create one for the user
-        find_global_config_file(
-            "config/config.json", self.setup_app_config, "AISCALATOR_CONFIG"
-        )
+        try:
+            f = open(self.find_user_config_file("config/config.json"), "rt")
+        except Exception:
+            generate_global_config()
+            f = open(data_file("../config/config.json"), "rt")
+        self.setup_app_config(f)
+        f.close()
         self.conf = self.setup_step_config()
         self.step = self.focus_step(notebook)
 
     def setup_app_config(self, file):
         """Setup application configuration"""
-        if file is None:
-            file = generate_global_config()
         print(file)
         # TODO: different formats, merge multiple files etc
 

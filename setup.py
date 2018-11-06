@@ -16,7 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The setup script."""
-import os
 from setuptools import setup, find_packages
 
 with open('README.rst') as readme_file:
@@ -25,37 +24,11 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-ROOT_DIR = os.getenv('VIRTUAL_ENV', '')
-if len(ROOT_DIR) == 0:
-    ROOT_DIR = os.getenv('HOME') + '/.aiscalator/'
-else:
-    ROOT_DIR += '/etc/aiscalator/'
-data_files = [
-    (ROOT_DIR + 'config',
-     ['resources/config/logging.yaml']),
-    (ROOT_DIR + 'config/docker/jupyter-spark/',
-     ['resources/config/docker/jupyter-spark/Dockerfile']),
-    (ROOT_DIR + 'config/docker/jupyter-spark/',
-     ['resources/config/docker/jupyter-spark/install-jupytext.sh']),
-    (ROOT_DIR + 'config/docker/airflow/',
-     ['resources/config/docker/airflow/Dockerfile']),
-    (ROOT_DIR + 'config/docker/airflow/config',
-     ['resources/config/docker/airflow/config/airflow.cfg']),
-    (ROOT_DIR + 'config/docker/airflow/config',
-     ['resources/config/docker/airflow/config/docker-compose-CeleryExecutor.yml']),
-    (ROOT_DIR + 'config/docker/airflow/config',
-     ['resources/config/docker/airflow/config/docker-compose-LocalExecutor.yml']),
-]
-
 requirements = [
     'Click>=6.0',
     'pytz>=2018.5',
-    'PyYAML>=3.13'
+    'PyYAML>=3.13',
 ]
-
-setup_requirements = ['pytest-runner', ]
-
-test_requirements = ['pytest', ]
 
 setup(
     author="Christophe Duong",
@@ -79,7 +52,7 @@ setup(
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development :: Libraries :: Application Frameworks',
     ],
-    description="Aiscalate Command Line Tool",
+    description="AIscalate your Jupyter Notebook Prototypes into Airflow Data Products",
     entry_points={
         'console_scripts': [
             'aiscalator=aiscalator.cli:main',
@@ -88,15 +61,15 @@ setup(
     install_requires=requirements,
     license="Apache Software License 2.0",
     long_description=readme + '\n\n' + history,
-    include_package_data=True,
     keywords='data science jupyter notebook prototype data engineering product airflow',
     name='aiscalator',
     packages=find_packages(),
-    data_files=data_files,
-    setup_requires=setup_requirements,
+    package_data={'config': ['*']},
+    include_package_data=True,
+    setup_requires=['pytest-runner'],
     test_suite='tests',
-    tests_require=test_requirements,
+    tests_require=['pytest'],
     url='https://github.com/Aiscalate/aiscalator',
-    version='0.0.2',
+    version='0.0.4',
     zip_safe=False,
 )
