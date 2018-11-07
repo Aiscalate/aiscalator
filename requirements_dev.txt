@@ -1,4 +1,4 @@
-airflow==1.8.0
+apache-airflow==1.10.0
 bumpversion==0.5.3
 click==7.0
 coverage==4.5.1
