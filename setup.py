@@ -70,6 +70,6 @@ setup(
     test_suite='tests',
     tests_require=['pytest'],
     url='https://github.com/Aiscalate/aiscalator',
-    version='0.0.4',
+    version='0.1.0',
     zip_safe=False,
 )
