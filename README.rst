@@ -57,38 +57,66 @@ Test if prerequisite softwares are installed:
     docker-compose --version
     pip --version
 
-Install AIscalator tool:
-
-.. code-block:: shell
+Install AIscalator tool::
 
     pip install aiscalator
 
-Download docker image to run Jupyter:
+Great, we are now ready to use the AIscalator!
 
-.. code-block:: shell
+The following setup commands are completely optional because they are dealing with
+prebuilding Docker images. If you choose not to do it at this point, they
+will get built later on whenever they are required.
+
+However, since producing a Docker image requires a certain amount of time
+to download, install packages, and sometimes even compiling them, these
+installation steps can be initiated right away all at once. Thus, you
+should be free to go enjoy a nice coffee break!
+
+You might want to customize your environment with the AIscalator, this
+will ask you few questions::
+
+    aiscalator setup
+
+Build docker images to run Jupyter environments::
 
     aiscalator jupyter setup
 
-Download docker image to run Airflow:
-
-.. code-block:: shell
+Build docker image to run Airflow::
 
     aiscalator airflow setup
+
+
+Start working
+-------------
+
+On one hand, aiscalator commands dealing with jupyter are defining tasks (in
+Airflow jargon) wrapped inside a Docker container. On the other, aiscalator
+commands for airflow are made to author, schedule and monitor DAGs.
 
 Jupyter
 -------
 
-Create a new Jupyter notebook to work on, define corresponding aiscalator step:
+Create a new Jupyter notebook to work on, define corresponding AIscalator task:
 
 .. code-block:: shell
 
     aiscalator jupyter new
 
-Run the step without GUI:
+Or you can edit an existing AIscalator task:
 
 .. code-block:: shell
 
-    aiscalator jupyter run <aiscalator step>
+    aiscalator jupyter edit <aiscalator task>
+    # For example, if you cloned the git repository:
+    aiscalator jupyter edit resources/example/example.json
+
+Run the task without GUI:
+
+.. code-block:: shell
+
+    aiscalator jupyter run <aiscalator task>
+    # For example, if you cloned the git repository:
+    aiscalator jupyter run resources/example/example.json
 
 Airflow
 -------
@@ -99,13 +127,19 @@ Start Airflow services:
 
     aiscalator airflow start
 
-Create a new AIscalator job, define the airflow DAG:
+Create a new AIscalator DAG, define the airflow job:
 
 .. code-block:: shell
 
     aiscalator airflow new
 
-Schedule AIscalator job:
+Or you can edit an existing AIscalator DAG:
+
+.. code-block:: shell
+
+    aiscalator airflow edit <aiscalator DAG>
+
+Schedule AIscalator DAG into local airflow dags folder:
 
 .. code-block:: shell
 
