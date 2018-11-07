@@ -30,7 +30,7 @@ requirements = [
     'PyYAML>=3.13',
 ]
 
-setup(
+s = setup(
     author="Christophe Duong",
     author_email='chris@aiscalate.com',
     classifiers=[
@@ -71,3 +71,9 @@ setup(
     version='0.1.0',
     zip_safe=False,
 )
+installation_path = s.command_obj['install'].install_lib
+print("""
+
+To install bash completion for aiscalator, add the following in your ~/.bashrc file:
+
+    source """ + installation_path + "aiscalator-*/aiscalator/config/aiscalator-complete.sh\n\n")

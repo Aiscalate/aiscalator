@@ -32,15 +32,5 @@
             "outputPath" : [ ],
             "modulesPath": [ ]
         }
-    ],
-
-"___" : "Pipeline definition: sequences of steps to execute",
-    "pipeline" : [
-
-    ],
-
-"____" : "Scheduling configuration of pipelines",
-    "cron" : [
-
     ]
 }
