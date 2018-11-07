@@ -37,9 +37,10 @@ processes from innovation to productization with:
     * Schedule Tasks, Refine Products
 * Data Science and Data Engineering best practices
 
-.. image:: aiscalator_process.png
-        :target: https://raw.githubusercontent.com/Aiscalate/aiscalator/master/resources/img/aiscalator_process.png
+.. image:: _static/aiscalator_process.png
+        :target: _static/aiscalator_process.png
         :align: center
+        :alt: From Prototype to Production Workflow
 
 ===========
 Quick Start
