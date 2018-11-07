@@ -35,8 +35,6 @@ def jupyter():
 @jupyter.command()
 def setup():
     """Setup the docker image to run notebooks."""
-    # TODO: ask questions and generates json + ipynb files
-    # TODO: afterward edit the newly created step
     logging.error("Not implemented yet")
     pass
 
