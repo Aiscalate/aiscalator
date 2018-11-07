@@ -19,7 +19,8 @@ CLI module for Jupyter related commands.
 """
 import click
 import logging
-
+import os
+import sys
 from aiscalator import __version__
 from aiscalator.core.config import AiscalatorConfig
 from aiscalator.jupyter import docker_command
@@ -39,13 +40,35 @@ def setup():
     pass
 
 
+def validate_step_name(ctx: click.Context, _, value):
+    try:
+        print(ctx.params)
+    except ValueError:
+        raise click.BadParameter('rolls need to be in format NdM')
+
+
 @jupyter.command()
-def new():
-    """Create a new notebook file with a new aiscalate config."""
-    # TODO: ask questions and generates json + ipynb files
-    # TODO: afterward edit the newly created step
-    logging.error("Not implemented yet")
-    pass
+@click.option('--name', prompt='What is the name of your step?',
+              help="Name of the new step to create",
+              metavar='<STEP>')
+@click.argument('path', type=click.Path())
+def new(name, path):
+    """Create a new notebook associated with a new aiscalate step config."""
+    file = os.path.join(path, name, name) + '.json'
+    if os.path.exists(file):
+        msg = file + ' already exists. Did you mean to run:\n'
+        for i in sys.argv:
+            if i != "new":
+                msg += i + ' '
+            else:
+                break
+        msg += "edit " + file + " instead?"
+        if click.confirm(msg, abort=True):
+            click.echo(
+                docker_command.docker_run_lab(AiscalatorConfig(file, []))
+            )
+    else:
+        click.echo(docker_command.docker_new(name, path))
 
 
 @jupyter.command()

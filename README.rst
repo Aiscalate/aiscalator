@@ -59,7 +59,10 @@ Test if prerequisite softwares are installed:
 
 Install AIscalator tool::
 
-    pip install aiscalator
+    git clone https://github.com/Aiscalate/aiscalator.git
+    cd aiscalator/
+    pip install -r requirements_dev.txt
+    make install
 
 Great, we are now ready to use the AIscalator!
 
@@ -89,30 +92,30 @@ Build docker image to run Airflow::
 Start working
 -------------
 
-On one hand, aiscalator commands dealing with jupyter are defining tasks (in
-Airflow jargon) wrapped inside a Docker container. On the other, aiscalator
-commands for airflow are made to author, schedule and monitor DAGs.
+AIscalator commands dealing with jupyter are defining tasks in Airflow jargon;
+In our case, they are all wrapped inside a Docker container. We also refer to
+them as Steps.
+
+Whereas AIscalator commands about airflow are made to author, schedule and monitor
+DAGs (Directed Acyclic Graphs). They define how a workflow is composed of multiple
+steps, their dependencies and execution times or triggers.
 
 Jupyter
 -------
 
-Create a new Jupyter notebook to work on, define corresponding AIscalator task:
+Create a new Jupyter notebook to work on, define corresponding AIscalator step::
 
-.. code-block:: shell
+    aiscalator jupyter new <path-to-store-new-files>
+    # For example,
+    aiscalator jupyter new src
 
-    aiscalator jupyter new
+Or you can edit an existing AIscalator step::
 
-Or you can edit an existing AIscalator task:
-
-.. code-block:: shell
-
-    aiscalator jupyter edit <aiscalator task>
+    aiscalator jupyter edit <aiscalator step>
     # For example, if you cloned the git repository:
     aiscalator jupyter edit resources/example/example.json
 
-Run the task without GUI:
-
-.. code-block:: shell
+Run the step without GUI::
 
     aiscalator jupyter run <aiscalator task>
     # For example, if you cloned the git repository:
@@ -121,26 +124,19 @@ Run the task without GUI:
 Airflow
 -------
 
-Start Airflow services:
-
-.. code-block:: shell
+Start Airflow services::
 
     aiscalator airflow start
 
-Create a new AIscalator DAG, define the airflow job:
-
-.. code-block:: shell
+Create a new AIscalator DAG, define the airflow job::
 
     aiscalator airflow new
 
-Or you can edit an existing AIscalator DAG:
-
-.. code-block:: shell
+Or you can edit an existing AIscalator DAG::
 
     aiscalator airflow edit <aiscalator DAG>
 
-Schedule AIscalator DAG into local airflow dags folder:
-
-.. code-block:: shell
+Schedule AIscalator DAG into local airflow dags folder::
 
     aiscalator airflow push <aiscalator DAG>
+

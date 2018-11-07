@@ -58,7 +58,7 @@ def docker_build(step: AiscalatorConfig):
         # Prepare a temp folder to build docker image
         with TemporaryDirectory(prefix="aiscalator_") as tmp:
             # copy the dockerfile
-            if requirements is not None:
+            if requirements is not None and isfile(requirements):
                 copy_replace(dockerfiledir + "/Dockerfile",
                              tmp + '/Dockerfile',
                              '#requirements.txt#', """
@@ -126,7 +126,7 @@ def prepare_docker_run_notebook(step: AiscalatorConfig, program):
                    ",target=/home/jovyan/work/" + basename(step.config_path),
     ]
     requirements = step.file_path('requirementsPath')
-    if requirements is not None:
+    if requirements is not None and isfile(requirements):
         commands += [
             "--mount", "type=bind,source=" + requirements +
                        ",target=/home/jovyan/work/requirements.txt",
@@ -250,3 +250,32 @@ def docker_run_lab(step: AiscalatorConfig):
         return url
     else:
         return ""
+
+
+def docker_new(name, path):
+    """
+    Starts a Jupyter Lab environment configured to edit a brand new step
+
+    Parameters
+    ----------
+    name : string
+        name of the new step
+    path : path
+        path to where the new step files should be created
+
+    Returns
+    -------
+    string
+        Url of the running jupyter lab
+    """
+    step_file = join(path, name, name) + '.json'
+    makedirs(dirname(step_file), exist_ok=True)
+    copy_replace(data_file("../config/template/step.json"), step_file,
+                 pattern="Untitled", replace_value=name)
+
+    notebook_file = join(path, name, 'notebook', name) + '.ipynb'
+    makedirs(dirname(notebook_file), exist_ok=True)
+    copy_replace(data_file("../config/template/notebook.json"), notebook_file)
+
+    open(join(path, name, "requirements.txt"), 'a').close()
+    docker_run_lab(AiscalatorConfig(step_file, [name]))

@@ -23,6 +23,7 @@ At the moment, you can install using two methods
 
 After cloning the project, you can start testing the following commands at the moment::
 
+    aiscalator jupyter new src
     aiscalator jupyter edit resources/example/example.json
     aiscalator jupyter run resources/example/example.json
     aiscalator airflow start

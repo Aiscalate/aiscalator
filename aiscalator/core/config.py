@@ -90,7 +90,7 @@ class AiscalatorConfig(object):
             ----------
             step_config_path : string
                 path to the step configuration file
-            notebook : string
+            notebook : List
                 name of the step from the configuration file to focus on
         """
         self.config_path = step_config_path
