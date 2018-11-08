@@ -14,11 +14,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+Class to parse output logs from subprocess and catch particular expressions
+"""
 from logging import info
 from re import search
 
 
-class LogRegexAnalyzer(object):
+class LogRegexAnalyzer():
     """
     A regular expression analyzer object to parse logs and extract
     values from patterns in the logs.
@@ -56,6 +59,6 @@ class LogRegexAnalyzer(object):
             # TODO improve logging in its own subprocess log file?
             info(line)
             if self.pattern is not None:
-                m = search(self.pattern, line)
-                if m:
-                    self.artifact = m.group(1).decode("utf-8")
+                match = search(self.pattern, line)
+                if match:
+                    self.artifact = match.group(1).decode("utf-8")

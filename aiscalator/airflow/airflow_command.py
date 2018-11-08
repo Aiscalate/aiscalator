@@ -48,7 +48,7 @@ def docker_compose(conf: AiscalatorConfig):
     return commands
 
 
-def airflow_setup(conf: AiscalatorConfig):
+def airflow_setup(_: AiscalatorConfig):
     """
     Setup the airflow configuration files and environment
 
@@ -62,7 +62,6 @@ def airflow_setup(conf: AiscalatorConfig):
     # cut -d ':' -f 3` --rm -t aiscalator/airflow .
     # TODO : to implement
     logging.error("Not implemented yet")
-    pass
 
 
 def airflow_up(conf: AiscalatorConfig):

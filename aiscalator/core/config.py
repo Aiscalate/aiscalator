@@ -14,6 +14,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+Handles configurations files for the application
+"""
+from platform import uname
 from datetime import datetime
 import json
 import logging
@@ -21,7 +25,6 @@ from logging import config
 import os
 from pytz import timezone
 
-from platform import uname
 from yaml import safe_load
 from aiscalator import __version__
 from aiscalator.core.utils import find, data_file
@@ -31,8 +34,8 @@ def setup_logging():
     """ Setup the logging configuration of the application """
     log_level = os.getenv('AISCALATOR_LOG_LEVEL', None)
 
-    with open(data_file("../config/logging.yaml"), 'rt') as f:
-        path = load_logging_conf(f)
+    with open(data_file("../config/logging.yaml"), 'rt') as file:
+        path = load_logging_conf(file)
     if path is None:
         logging.basicConfig(level=logging.INFO)
     if log_level is not None:
@@ -61,7 +64,7 @@ def generate_global_config():
     return ""
 
 
-class AiscalatorConfig(object):
+class AiscalatorConfig():
     """
     A configuration object for the Aiscalator application.
 
@@ -77,7 +80,7 @@ class AiscalatorConfig(object):
     ----------
     config_path : string
         path to the step configuration file
-    rootDir : string
+    root_dir : string
         path to the directory containing the configuration file
     conf : string
         step configuration after loading the file
@@ -95,19 +98,19 @@ class AiscalatorConfig(object):
         """
         self.config_path = step_config_path
         if step_config_path is None:
-            self.rootDir = None
+            self.root_dir = None
         else:
-            self.rootDir = os.path.dirname(step_config_path)
-            if not self.rootDir.endswith("/"):
-                self.rootDir += "/"
+            self.root_dir = os.path.dirname(step_config_path)
+            if not self.root_dir.endswith("/"):
+                self.root_dir += "/"
         setup_logging()
         try:
-            f = open(self.find_user_config_file("config/config.json"), "rt")
+            file = open(self.find_user_config_file("config/config.json"), "rt")
         except Exception:
             generate_global_config()
-            f = open(data_file("../config/config.json"), "rt")
-        self.setup_app_config(f)
-        f.close()
+            file = open(data_file("../config/config.json"), "rt")
+        self.setup_app_config(file)
+        file.close()
         self.conf = self.setup_step_config()
         self.step = self.focus_step(notebook)
 
@@ -121,23 +124,23 @@ class AiscalatorConfig(object):
         if self.config_path is None:
             return None
         try:
-            j = json.loads(self.config_path)
+            json_file = json.loads(self.config_path)
         except json.decoder.JSONDecodeError:
             try:
-                with open(self.config_path, "r") as f:
-                    j = json.load(f)
+                with open(self.config_path, "r") as file:
+                    json_file = json.load(file)
             except Exception as err2:
                 logging.error("Invalid configuration file")
                 raise err2
-        logging.debug("Configuration file = " + json.dumps(j, indent=4))
-        return j
+        logging.debug("Configuration file = %s", json.dumps(json_file, indent=4))
+        return json_file
 
     def focus_step(self, notebook):
         """Find the notebook in the step configuration"""
         result = None
         if self.config_path is None:
             return None
-        if notebook is None or len(notebook) == 0:
+        if notebook is None or not notebook:
             result = self.conf['step'][0]
         else:
             step = find(self.conf['step'], notebook[0])
@@ -193,29 +196,27 @@ class AiscalatorConfig(object):
         """Depending on how the timezone is configured, returns the
          timestamp for now
         """
-        d = datetime.utcnow().replace(tzinfo=timezone("UTC"))
+        date_now = datetime.utcnow().replace(tzinfo=timezone("UTC"))
         # TODO use config from self.gconf.get_timezone()
         pst = timezone('Europe/Paris')
-        return d.astimezone(pst).strftime("%Y%m%d%H%M%S%f")
+        return date_now.astimezone(pst).strftime("%Y%m%d%H%M%S%f")
 
     def step_field(self, field):
         """Returns the value associated with the field for the focused step"""
         if self.has_step_field(field):
             return self.step[field]
-        else:
-            return None
+        return None
 
     def has_step_field(self, field):
         """Tests if the focus step has a configuration value for the field"""
         if self.step is None:
             return False
-        else:
-            return field in self.step
+        return field in self.step
 
     def file_path(self, string):
         """Returns absolute path of a file from a field of the focused step"""
         # TODO if string is url/git repo, download file locally first
-        return os.path.abspath(self.rootDir + self.step_field(string))
+        return os.path.abspath(self.root_dir + self.step_field(string))
 
     def container_name(self):
         """Return the docker container name to execute this step"""
@@ -229,7 +230,7 @@ class AiscalatorConfig(object):
         """Returns a list of docker parameters"""
         result = []
         if self.has_step_field("parameters"):
-            for p in self.step_field("parameters"):
-                for k in p:
-                    result += ["-p", k, p[k]]
+            for param in self.step_field("parameters"):
+                for key in param:
+                    result += ["-p", key, param[key]]
         return result

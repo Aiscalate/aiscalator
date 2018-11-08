@@ -14,13 +14,28 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+Various Utility functions
+"""
 from logging import info
 import os
 from threading import Thread
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE, STDOUT  # nosec
 
 
 def data_file(path):
+    """
+    Utility function to find resources data file packaged along with code
+
+    Parameters
+    ----------
+    path : path
+        path to the resource file in the package
+
+    Returns
+    -------
+        absolute path to the resource data file
+    """
     return os.path.join(os.path.abspath(os.path.dirname(__file__)), path)
 
 
@@ -44,9 +59,9 @@ def find(collection, item, field='name'):
         Corresponding element that has a field matching item in
         the collection
     """
-    for s in collection:
-        if s[field] == item:
-            return s
+    for element in collection:
+        if element[field] == item:
+            return element
     return None
 
 
@@ -66,12 +81,12 @@ def copy_replace(src, dst, pattern='', replace_value=''):
         Value to replace by in the dst file
 
     """
-    f1 = open(src, 'r')
-    f2 = open(dst, 'w')
-    for line in f1:
-        f2.write(line.replace(pattern, replace_value))
-    f1.close()
-    f2.close()
+    file1 = open(src, 'r')
+    file2 = open(dst, 'w')
+    for line in file1:
+        file2.write(line.replace(pattern, replace_value))
+    file1.close()
+    file2.close()
 
 
 def log_info(pipe):
@@ -81,7 +96,7 @@ def log_info(pipe):
     return True
 
 
-class BackgroundThreadRunner(object):
+class BackgroundThreadRunner():
     """
     Worker Thread to run logging output in the background
 
@@ -101,14 +116,17 @@ class BackgroundThreadRunner(object):
     def __init__(self, command, log_function, no_redirect=False):
         self.no_redirect = no_redirect
         if no_redirect:
-            self.process = Popen(command)
+            self.process = Popen(command)  # nosec
         else:
-            self.process = Popen(command, stdout=PIPE, stderr=STDOUT)
+            self.process = Popen(command, stdout=PIPE, stderr=STDOUT)  # nosec
         self.log_function = log_function
         self.worker = Thread(name='worker', target=self.run)
         self.worker.start()
 
     def run(self):
+        """
+        Starts the Thread, process the output of the process
+        """
         if not self.no_redirect:
             self.log_function(self.process.stdout)
 
@@ -141,9 +159,9 @@ def subprocess_run(command, log_function=log_info,
     """
     if wait:
         if no_redirect:
-            process = Popen(command)
+            process = Popen(command, shell=False)  # nosec
         else:
-            process = Popen(command, stdout=PIPE, stderr=STDOUT)
+            process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=False)  # nosec
             with process.stdout:
                 log_function(process.stdout)
         return process.wait()

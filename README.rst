@@ -17,11 +17,13 @@ AIscalator
         :target: https://requires.io/github/Aiscalate/aiscalator/requirements/?branch=master
         :alt: Requirements Status
 
+.. image:: https://api.codacy.com/project/badge/Grade/16c9117a680041f382ba48bd5cf73ca2
+        :target: https://www.codacy.com/app/ChristopheDuong/aiscalator
 
 * Free software: Apache Software License 2.0
 * Website: http://www.aiscalate.com
 * Documentation: https://aiscalator.readthedocs.io.
-
+* Bugs: https://github.com/aiscalate/aiscalator/issues
 
 Key Features
 ------------

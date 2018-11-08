@@ -1,21 +1,21 @@
 {
     "step" : [
         {
-            "name" :        "Untitled",
-            "description" : "",
-            "tags" : [ ],
+            "name"              : "Untitled",
+            "description"       : "",
+            "tags"              : [ ],
 
-            "dockerfile" :  "jupyter-spark",
-            "requirementsPath" : "requirements.txt",
-            "dockerImageName" : "aiscalator/Untitled",
+            "dockerfile"        : "jupyter-spark",
+            "requirementsPath"  : "requirements.txt",
+            "dockerImageName"   : "aiscalator/default",
 
-            "type" :        "jupyter",
-            "path" :        "notebook/Untitled.ipynb",
-            "executionDirPath" : "../build/Untitled",
-            "parameters" : [ ],
-            "inputPath"  : [ ],
-            "outputPath" : [ ],
-            "modulesPath": [ ]
+            "type"              : "jupyter",
+            "path"              : "notebook/Untitled.ipynb",
+            "executionDirPath"  : "../build/Untitled",
+            "parameters"        : [ ],
+            "inputPath"         : [ ],
+            "outputPath"        : [ ],
+            "modulesPath"       : [ ]
         }
     ]
 }

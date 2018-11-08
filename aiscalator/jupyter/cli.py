@@ -17,10 +17,12 @@
 """
 CLI module for Jupyter related commands.
 """
-import click
 import logging
 import os
 import sys
+
+import click
+
 from aiscalator import __version__
 from aiscalator.core.config import AiscalatorConfig
 from aiscalator.jupyter import docker_command
@@ -36,15 +38,8 @@ def jupyter():
 @jupyter.command()
 def setup():
     """Setup the docker image to run notebooks."""
+    # TODO to implement
     logging.error("Not implemented yet")
-    pass
-
-
-def validate_step_name(ctx: click.Context, _, value):
-    try:
-        print(ctx.params)
-    except ValueError:
-        raise click.BadParameter('rolls need to be in format NdM')
 
 
 @jupyter.command()
@@ -72,7 +67,7 @@ def new(name, path):
 
 
 @jupyter.command()
-@click.argument('conf')
+@click.argument('conf', type=click.Path(exists=True))
 @click.argument('notebook', nargs=-1)
 # TODO add parameters override from CLI
 def edit(conf, notebook):
@@ -81,7 +76,7 @@ def edit(conf, notebook):
 
 
 @jupyter.command()
-@click.argument('conf')
+@click.argument('conf', type=click.Path(exists=True))
 @click.argument('notebook', nargs=-1)
 # TODO add parameters override from CLI
 def run(conf, notebook):
@@ -90,6 +85,6 @@ def run(conf, notebook):
     # we have to stage notebooks with same dockerfile together,
     # merge their requirements so that groups of notebooks can be
     # run together in the same container sequentially
-    click.echo(docker_command.docker_run_papermill(
-        AiscalatorConfig(conf, notebook))
+    click.echo(
+        docker_command.docker_run_papermill(AiscalatorConfig(conf, notebook))
     )

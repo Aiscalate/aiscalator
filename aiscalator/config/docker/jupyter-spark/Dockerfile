@@ -1,3 +1,8 @@
+# AUTHOR: Christophe Duong <chris@aiscalate.com>
+# DESCRIPTION: Jupyter container tuned for AIscalator
+# BUILD: docker build --rm -t aiscalator/jupyter-spark .
+# SOURCE: https://github.com/aiscalate/aiscalator
+
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-all-spark-notebook
 FROM jupyter/all-spark-notebook:latest
 LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
@@ -9,7 +14,8 @@ RUN pip install --upgrade pip \
     && pip install flake8 \
     && pip install jupytext \
     && jupyter labextension install @jupyterlab/celltags \
-    && bash /home/jovyan/install-jupytext.sh
+    && bash /home/jovyan/install-jupytext.sh \
+    && rm /home/jovyan/install-jupytext.sh
 
 # optional additional requirements.txt:
 #requirements.txt#

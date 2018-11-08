@@ -69,9 +69,9 @@ RUN rm requirements.txt"""
                 copy(requirements, tmp + '/requirements.txt')
             else:
                 copy(dockerfiledir + "/Dockerfile", tmp + '/Dockerfile')
-            for f in listdir(dockerfiledir):
-                if f != "Dockerfile":
-                    copy(join(dockerfiledir, f), join(tmp, f))
+            for file in listdir(dockerfiledir):
+                if file != "Dockerfile":
+                    copy(join(dockerfiledir, file), join(tmp, file))
             chdir(tmp)
             debug("Running...: docker build --rm -t " +
                   docker_image_name + " .")
@@ -113,7 +113,7 @@ def prepare_docker_run_notebook(step: AiscalatorConfig, program):
         "docker", "run", "--name", step.container_name(), "--rm",
         "-p", "10000:8888",
         "-p", "4040:4040"
-     ]
+    ]
     for env in step.user_env_file():
         if isfile(env):
             commands += ["--env-file", env]
@@ -123,37 +123,37 @@ def prepare_docker_run_notebook(step: AiscalatorConfig, program):
         "--mount", "type=bind,source=" + dirname(filename) +
         ",target=/home/jovyan/work/notebook/",
         "--mount", "type=bind,source=" + abspath(step.config_path) +
-                   ",target=/home/jovyan/work/" + basename(step.config_path),
+        ",target=/home/jovyan/work/" + basename(step.config_path),
     ]
     requirements = step.file_path('requirementsPath')
     if requirements is not None and isfile(requirements):
         commands += [
             "--mount", "type=bind,source=" + requirements +
-                       ",target=/home/jovyan/work/requirements.txt",
+            ",target=/home/jovyan/work/requirements.txt",
         ]
-    for v in step.step_field("modulesPath"):
+    for value in step.step_field("modulesPath"):
         # TODO support readonly flag in config & bind vs tmpfs types
-        for i in v:
+        for i in value:
             # TODO check if v[i] is relative path?
             commands += [
-                "--mount", "type=bind,source=" + abspath(step.rootDir + i) +
-                ",target=/home/jovyan/work/modules/" + v[i]
+                "--mount", "type=bind,source=" + abspath(step.root_dir + i) +
+                ",target=/home/jovyan/work/modules/" + value[i]
             ]
-    for v in step.step_field("inputPath"):
-        for i in v:
+    for value in step.step_field("inputPath"):
+        for i in value:
             # TODO check if v[i] is relative path?
             commands += [
-                "--mount", "type=bind,source=" + abspath(step.rootDir + i) +
-                ",target=/home/jovyan/work/data/input/" + v[i] +
+                "--mount", "type=bind,source=" + abspath(step.root_dir + i) +
+                ",target=/home/jovyan/work/data/input/" + value[i] +
                 ",readonly"
             ]
-    for v in step.step_field("outputPath"):
-        for i in v:
+    for value in step.step_field("outputPath"):
+        for i in value:
             # TODO check if v[i] is relative path?
-            makedirs(abspath(step.rootDir + i), exist_ok=True)
+            makedirs(abspath(step.root_dir + i), exist_ok=True)
             commands += [
-                "--mount", "type=bind,source=" + abspath(step.rootDir + i) +
-                ",target=/home/jovyan/work/data/output/" + v[i]
+                "--mount", "type=bind,source=" + abspath(step.root_dir + i) +
+                ",target=/home/jovyan/work/data/output/" + value[i]
             ]
     # TODO if filename does not exist, generate one
     commands += program
@@ -186,12 +186,12 @@ def docker_run_papermill(step: AiscalatorConfig, prepare_only=False):
     parameters = step.extract_parameters()
     makedirs(step.file_path('executionDirPath'), exist_ok=True)
     commands = prepare_docker_run_notebook(step, [
-            "--mount", "type=bind,source=" +
-                       step.file_path('executionDirPath') +
-            ",target=/home/jovyan/work/notebook_run/",
-            docker_image, "start.sh",
-            # TODO: check step type, if jupyter then papermill
-            "papermill", notebook, notebook_output
+        "--mount", "type=bind,source=" +
+        step.file_path('executionDirPath') +
+        ",target=/home/jovyan/work/notebook_run/",
+        docker_image, "start.sh",
+        # TODO: check step type, if jupyter then papermill
+        "papermill", notebook, notebook_output
     ])
     if prepare_only:
         commands.append("--prepare-only")
@@ -220,7 +220,7 @@ def docker_run_lab(step: AiscalatorConfig):
     docker_image = docker_build(step)
     # TODO: shutdown other jupyter lab still running
     notebook = basename(step.step_field('path'))
-    if len(step.extract_parameters()) > 0:
+    if step.extract_parameters():
         docker_run_papermill(step, prepare_only=True)
     makedirs(step.file_path('executionDirPath'), exist_ok=True)
     commands = [
@@ -248,8 +248,7 @@ def docker_run_lab(step: AiscalatorConfig):
         # TODO --no-browser option
         webbrowser.open(url)
         return url
-    else:
-        return ""
+    return ""
 
 
 def docker_new(name, path):

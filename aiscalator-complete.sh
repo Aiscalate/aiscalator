@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 _aiscalator_completion() {
     local IFS=$'
 '

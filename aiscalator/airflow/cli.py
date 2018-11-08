@@ -17,8 +17,8 @@
 """
 CLI module for Airflow related commands.
 """
-import click
 import logging
+import click
 
 from aiscalator import __version__
 from aiscalator.core.config import AiscalatorConfig
@@ -61,7 +61,7 @@ def stop():
 @click.argument('subcommand', nargs=-1, required=True)
 def run(service, subcommand):
     """Run sub-command in a running docker service."""
-    if len(subcommand) == 0:
+    if not subcommand:
         subcommand = None
     click.echo(airflow_command.airflow_cmd(AiscalatorConfig(),
                                            service=service, cmd=subcommand))
@@ -75,7 +75,6 @@ def new():
     """Create a new DAG job"""
     # TODO to implement
     logging.error("Not implemented yet")
-    pass
 
 
 @airflow.command()
@@ -83,7 +82,6 @@ def edit():
     """Edit DAG job"""
     # TODO to implement
     logging.error("Not implemented yet")
-    pass
 
 
 @airflow.command()
@@ -91,4 +89,3 @@ def push():
     """Push a job into the DAGS folder to schedule in Airflow."""
     # TODO to implement
     logging.error("Not implemented yet")
-    pass

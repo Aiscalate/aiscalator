@@ -21,6 +21,7 @@ Using the python click package (https://click.palletsprojects.com/en/7.x/),
 this module defines all the entry points to the application.
 
 """
+import logging
 import sys
 import click
 
@@ -40,6 +41,13 @@ def main():
 def version():
     """Show the version and exit."""
     click.echo(sys.argv[0] + ', version ' + __version__)
+
+
+@main.command()
+def setup():
+    """Setup the configuration of AIscalator applications"""
+    # TODO to implement
+    logging.error("Not implemented yet")
 
 
 main.add_command(airflow_cli.airflow)

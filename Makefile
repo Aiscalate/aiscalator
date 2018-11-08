@@ -53,6 +53,9 @@ clean-test: ## remove test and coverage artifacts
 lint: ## check style with flake8
 	flake8 aiscalator tests
 
+pylint: ## check style with flake8
+	pylint aiscalator tests
+
 test: ## run tests quickly with the default Python
 	py.test
 
@@ -64,6 +67,10 @@ coverage: ## check code coverage quickly with the default Python
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
+
+codacy:
+	mkdir -p build
+	codacy-analysis-cli analyse -d "${PWD}" | tee build/codacy.txt
 
 docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/aiscalator.rst
