@@ -32,17 +32,21 @@ RUN curl -fsSL "https://download.docker.com/linux/debian/gpg" | apt-key add - \
     #&& apt-get upgrade -yqq \
     && apt-get install -yqq --no-install-recommends \
         docker-ce \
-    && pip install aiscalator \
-    && apt-get purge --auto-remove -yqq $buildDeps \
+    && pip install aiscalator==0.1.0 \
+    && apt-get purge --auto-remove -yqq \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf \
-        /var/lib/apt/lists/* \
-        /tmp/* \
-        /var/tmp/* \
-        /usr/share/man \
-        /usr/share/doc \
-        /usr/share/doc-base
+        "/var/lib/apt/lists/" \
+        "/tmp/" \
+        "/var/tmp/" \
+        "/usr/share/man" \
+        "/usr/share/doc" \
+        "/usr/share/doc-base"
+    && mkdir -p \
+        "/var/lib/apt/lists/" \
+        "/tmp/" \
+        "/var/tmp/
 
 COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 

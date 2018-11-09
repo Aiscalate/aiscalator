@@ -249,6 +249,8 @@ def format_file_content(content, prefix="", suffix=""):
     result = ""
     with open(content, "r") as file:
         for line in file:
+            # TODO handle comments
+            # TODO check validity of the line for extra security
             result += prefix + quote(line) + suffix
     return result
 

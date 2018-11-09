@@ -41,9 +41,9 @@ def docker_compose(conf: AiscalatorConfig):
         "config/docker-compose-CeleryExecutor.yml"
     )
     commands = ["docker-compose"]
-    for env in conf.user_env_file():
-        if os.path.isfile(env):
-            commands += ["--env-file", env]
+    # for env in conf.user_env_file():
+    #     if os.path.isfile(env):
+    #        commands += ["--env-file", env]
     commands += ["-f", dockerfile]
     return commands
 

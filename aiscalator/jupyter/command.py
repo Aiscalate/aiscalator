@@ -53,6 +53,7 @@ def prepare_docker_env(step: AiscalatorConfig, program):
         The full Array of Strings representing the commands to execute
         in the docker run call
     """
+    # TODO: refactor using https://github.com/docker/docker-py ?
     commands = [
         "docker", "run", "--name", step.container_name(), "--rm",
         # TODO improve port publishing
