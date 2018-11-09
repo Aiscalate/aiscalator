@@ -26,6 +26,7 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'Click>=6.0',
+    'pyhocon>=0.3.47',
     'pytz>=2018.5',
     'PyYAML>=3.13',
 ]

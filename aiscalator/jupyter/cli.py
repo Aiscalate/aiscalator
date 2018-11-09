@@ -25,7 +25,7 @@ import click
 
 from aiscalator import __version__
 from aiscalator.core.config import AiscalatorConfig
-from aiscalator.jupyter import docker_command
+from aiscalator.jupyter import command
 
 
 @click.group()
@@ -46,24 +46,42 @@ def setup():
 @click.option('--name', prompt='What is the name of your step?',
               help="Name of the new step to create",
               metavar='<STEP>')
+# TODO: import an existing notebook and create a new aiscalate step from it
 @click.argument('path', type=click.Path())
 def new(name, path):
     """Create a new notebook associated with a new aiscalate step config."""
-    file = os.path.join(path, name, name) + '.json'
-    if os.path.exists(file):
-        msg = file + ' already exists. Did you mean to run:\n'
-        for i in sys.argv:
-            if i != "new":
-                msg += i + ' '
-            else:
-                break
-        msg += "edit " + file + " instead?"
-        if click.confirm(msg, abort=True):
-            click.echo(
-                docker_command.docker_run_lab(AiscalatorConfig(file, []))
-            )
+    file_conf = os.path.join(path, name, name) + '.conf'
+    file_json = os.path.join(path, name, name) + '.json'
+    if os.path.exists(file_conf):
+        prompt_edit(file_conf)
+    elif os.path.exists(file_json):
+        prompt_edit(file_json)
     else:
-        click.echo(docker_command.docker_new(name, path))
+        click.echo(command.jupyter_new(name, path))
+
+
+def prompt_edit(file):
+    """
+    When creating a new step, if it is already defined,
+    ask to edit instead
+
+    Parameters
+    ----------
+    file : str
+        existing configuration file
+
+    """
+    msg = file + ' already exists. Did you mean to run:\n'
+    for i in sys.argv:
+        if i != "new":
+            msg += i + ' '
+        else:
+            break
+    msg += "edit " + file + " instead?"
+    if click.confirm(msg, abort=True):
+        conf = AiscalatorConfig(step_config=file,
+                                steps_selection=[])
+        click.echo(command.jupyter_edit(conf))
 
 
 @jupyter.command()
@@ -72,7 +90,9 @@ def new(name, path):
 # TODO add parameters override from CLI
 def edit(conf, notebook):
     """Edit the notebook from an aiscalate config with JupyterLab."""
-    click.echo(docker_command.docker_run_lab(AiscalatorConfig(conf, notebook)))
+    app_config = AiscalatorConfig(step_config=conf,
+                                  steps_selection=notebook)
+    click.echo(command.jupyter_edit(app_config))
 
 
 @jupyter.command()
@@ -85,6 +105,9 @@ def run(conf, notebook):
     # we have to stage notebooks with same dockerfile together,
     # merge their requirements so that groups of notebooks can be
     # run together in the same container sequentially
-    click.echo(
-        docker_command.docker_run_papermill(AiscalatorConfig(conf, notebook))
-    )
+    app_config = AiscalatorConfig(step_config=conf,
+                                  steps_selection=notebook)
+    click.echo(command.jupyter_run(app_config))
+
+
+# TODO check a step configuration file (validate against template step.conf)

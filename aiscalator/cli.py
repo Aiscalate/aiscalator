@@ -50,6 +50,13 @@ def setup():
     logging.error("Not implemented yet")
 
 
+@main.command()
+def cookiecutter():
+    """Generates a cookiecutter project to AIscalate"""
+    # TODO to implement
+    logging.error("Not implemented yet")
+
+
 main.add_command(airflow_cli.airflow)
 main.add_command(jupyter_cli.jupyter)
 

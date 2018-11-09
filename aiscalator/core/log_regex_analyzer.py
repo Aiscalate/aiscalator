@@ -29,9 +29,9 @@ class LogRegexAnalyzer():
 
     Attributes
     ----------
-    artifact : string
+    _artifact : str
         Value of the pattern found in the logs
-    pattern : bytes
+    _pattern : bytes
         Regular expression to search for in the logs
     """
 
@@ -39,11 +39,11 @@ class LogRegexAnalyzer():
         """
         Parameters
         ----------
-        pattern : string
+        pattern : pattern
             Regular expression to search for in the logs
         """
-        self.artifact = "latest"
-        self.pattern = pattern
+        self._artifact = None
+        self._pattern = pattern
 
 # https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
     def grep_logs(self, pipe):
@@ -58,7 +58,11 @@ class LogRegexAnalyzer():
         for line in iter(pipe.readline, b''):  # b'\n'-separated lines
             # TODO improve logging in its own subprocess log file?
             info(line)
-            if self.pattern is not None:
-                match = search(self.pattern, line)
+            if self._pattern is not None:
+                match = search(self._pattern, line)
                 if match:
-                    self.artifact = match.group(1).decode("utf-8")
+                    self._artifact = match.group(1).decode("utf-8")
+
+    def artifact(self):
+        """ Returns the artifact extracted from the logs."""
+        return self._artifact

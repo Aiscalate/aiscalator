@@ -3,7 +3,7 @@
 # BUILD: docker build --build-arg DOCKER_GID=`getent group docker | cut -d ':' -f 3` --rm -t aiscalator/airflow .
 # SOURCE: https://github.com/aiscalate/aiscalator
 
-FROM puckel/docker-airflow:latest
+FROM puckel/docker-airflow:1.10.0-5
 LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
 
 ARG AIRFLOW_HOME=/usr/local/airflow
@@ -14,20 +14,22 @@ RUN groupadd -r -g ${DOCKER_GID} docker
 
 # https://docs.docker.com/install/linux/docker-ce/debian/
 RUN apt-get update -yqq \
-    && apt-get upgrade -yqq \
+    #&& apt-get upgrade -yqq \
     && apt-get install -yqq --no-install-recommends \
      apt-transport-https \
      ca-certificates \
      gnupg2 \
-     software-properties-common
+     software-properties-common \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - \
+RUN curl -fsSL "https://download.docker.com/linux/debian/gpg" | apt-key add - \
     && add-apt-repository \
    "deb [arch=amd64] https://download.docker.com/linux/debian \
    $(lsb_release -cs) \
    stable" \
     && apt-get update -yqq \
-    && apt-get upgrade -yqq \
+    #&& apt-get upgrade -yqq \
     && apt-get install -yqq --no-install-recommends \
         docker-ce \
     && pip install aiscalator \

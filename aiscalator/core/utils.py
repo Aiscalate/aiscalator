@@ -81,12 +81,20 @@ def copy_replace(src, dst, pattern='', replace_value=''):
         Value to replace by in the dst file
 
     """
-    file1 = open(src, 'r')
-    file2 = open(dst, 'w')
+    if isinstance(src, str):
+        file1 = open(src, 'r')
+    else:
+        file1 = src
+    if isinstance(dst, str):
+        file2 = open(dst, 'w')
+    else:
+        file2 = dst
     for line in file1:
         file2.write(line.replace(pattern, replace_value))
-    file1.close()
-    file2.close()
+    if isinstance(src, str):
+        file1.close()
+    if isinstance(dst, str):
+        file2.close()
 
 
 def log_info(pipe):
@@ -104,31 +112,36 @@ class BackgroundThreadRunner():
 
     Attributes
     ----------
-    process :
+    _process :
         Process object of the command running in the background
-    log_function : function(stream -> bool)
+    _log_function : function(stream -> bool)
         callback function to log the output of the command
-    no_redirect : bool
+    _no_redirect : bool
         whether the subprocess STDOUT and STDERR should be redirected to logs
-    worker : Thread
+    _worker : Thread
         Thread object
     """
     def __init__(self, command, log_function, no_redirect=False):
-        self.no_redirect = no_redirect
+        self._no_redirect = no_redirect
         if no_redirect:
-            self.process = Popen(command)  # nosec
+            self._process = Popen(command)  # nosec
         else:
-            self.process = Popen(command, stdout=PIPE, stderr=STDOUT)  # nosec
-        self.log_function = log_function
-        self.worker = Thread(name='worker', target=self.run)
-        self.worker.start()
+            self._process = Popen(command, stdout=PIPE, stderr=STDOUT)  # nosec
+        self._log_function = log_function
+        self._worker = Thread(name='worker', target=self.run)
+        self._worker.start()
 
     def run(self):
         """
-        Starts the Thread, process the output of the process
+        Starts the Thread, process the output of the process.
+
         """
-        if not self.no_redirect:
-            self.log_function(self.process.stdout)
+        if not self._no_redirect:
+            self._log_function(self._process.stdout)
+
+    def process(self):
+        """Returns the process object."""
+        return self._process
 
 
 def subprocess_run(command, log_function=log_info,
@@ -161,7 +174,10 @@ def subprocess_run(command, log_function=log_info,
         if no_redirect:
             process = Popen(command, shell=False)  # nosec
         else:
-            process = Popen(command, stdout=PIPE, stderr=STDOUT, shell=False)  # nosec
+            process = Popen(command,
+                            stdout=PIPE,
+                            stderr=STDOUT,
+                            shell=False)  # nosec
             with process.stdout:
                 log_function(process.stdout)
         return process.wait()

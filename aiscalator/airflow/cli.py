@@ -22,7 +22,7 @@ import click
 
 from aiscalator import __version__
 from aiscalator.core.config import AiscalatorConfig
-from aiscalator.airflow import airflow_command
+from aiscalator.airflow import command
 
 
 @click.group()
@@ -35,13 +35,13 @@ def airflow():
 @airflow.command()
 def setup():
     """Setup interactively the Airflow home folder and configurations."""
-    click.echo(airflow_command.airflow_setup(AiscalatorConfig()))
+    click.echo(command.airflow_setup(AiscalatorConfig()))
 
 
 @airflow.command()
 def start():
     """Start docker images to bring airflow services up."""
-    click.echo(airflow_command.airflow_up(AiscalatorConfig()))
+    click.echo(command.airflow_up(AiscalatorConfig()))
     click.echo("""
 Airflow: http://localhost:8080
 Flower: http://localhost:5555
@@ -51,7 +51,7 @@ Flower: http://localhost:5555
 @airflow.command()
 def stop():
     """Stop docker images to bring airflow services down."""
-    click.echo(airflow_command.airflow_down(AiscalatorConfig()))
+    click.echo(command.airflow_down(AiscalatorConfig()))
 
 
 @airflow.command()
@@ -63,8 +63,8 @@ def run(service, subcommand):
     """Run sub-command in a running docker service."""
     if not subcommand:
         subcommand = None
-    click.echo(airflow_command.airflow_cmd(AiscalatorConfig(),
-                                           service=service, cmd=subcommand))
+    click.echo(command.airflow_cmd(AiscalatorConfig(),
+                                   service=service, cmd=subcommand))
 
 # TODO CLI to  scale celery workers
 # docker-compose -f docker-compose-CeleryExecutor.yml scale worker=5
