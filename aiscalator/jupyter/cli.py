@@ -46,9 +46,12 @@ def setup():
 @click.option('--name', prompt='What is the name of your step?',
               help="Name of the new step to create",
               metavar='<STEP>')
+@click.option('-f', '--format',
+              help="format of the configuration file (default is hocon)",
+              type=click.Choice(['json', 'hocon']))
 # TODO: import an existing notebook and create a new aiscalate step from it
 @click.argument('path', type=click.Path())
-def new(name, path):
+def new(name, output_format, path):
     """Create a new notebook associated with a new aiscalate step config."""
     file_conf = os.path.join(path, name, name) + '.conf'
     file_json = os.path.join(path, name, name) + '.json'
@@ -57,7 +60,8 @@ def new(name, path):
     elif os.path.exists(file_json):
         prompt_edit(file_json)
     else:
-        click.echo(command.jupyter_new(name, path))
+        click.echo(command.jupyter_new(name, path,
+                                       output_format=output_format))
 
 
 def prompt_edit(file):
@@ -108,6 +112,3 @@ def run(conf, notebook):
     app_config = AiscalatorConfig(step_config=conf,
                                   steps_selection=notebook)
     click.echo(command.jupyter_run(app_config))
-
-
-# TODO check a step configuration file (validate against template step.conf)

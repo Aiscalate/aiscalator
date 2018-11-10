@@ -39,9 +39,9 @@ def setup_logging():
     log_level = os.getenv('AISCALATOR_LOG_LEVEL', None)
     with open(data_file("../config/logging.yaml"), 'rt') as file:
         path = load_logging_conf(file)
-    if path is None:
+    if not path:
         logging.basicConfig(level=logging.INFO)
-    if log_level is not None:
+    if log_level:
         logging.root.setLevel(log_level)
     msg = ("Starting " + os.path.basename(__name__) +
            " version " + __version__ + " on " +
@@ -51,7 +51,7 @@ def setup_logging():
 
 def load_logging_conf(file):
     """Reads and loads the logging configuration file"""
-    if file is not None:
+    if file:
         os.makedirs('/tmp/aiscalator/log', exist_ok=True)
         conf = safe_load(file.read())
         config.dictConfig(conf)
@@ -256,7 +256,7 @@ class AiscalatorConfig:
         value for the field.
 
         """
-        if self.app_config() is None:
+        if not self.app_config():
             return False
         return field in self.app_config()
 
@@ -267,7 +267,7 @@ class AiscalatorConfig:
 
         """
         if self.has_step_field(field):
-            return self._step[field]
+            return self._step[1][field]
         return None
 
     def has_step_field(self, field) -> bool:
@@ -276,9 +276,9 @@ class AiscalatorConfig:
         value for the field.
 
         """
-        if self._step is None:
+        if not self._step:
             return False
-        return field in self._step
+        return field in self._step[1]
 
     def step_config_path(self):
         """
@@ -296,6 +296,14 @@ class AiscalatorConfig:
                 return os.path.abspath(self._step_config)
         # TODO if string is url/git repo, download file locally first
         return None
+
+    def step_name(self):
+        """
+        Returns the name of the currently focused step
+        """
+        if not self._step:
+            return None
+        return self._step[0]
 
     def root_dir(self):
         """
@@ -333,7 +341,7 @@ class AiscalatorConfig:
         return (
             self.step_field("task.type") +
             "_" +
-            self.step_field("name")
+            self.step_name()
         )
 
     def extract_parameters(self) -> list:
@@ -367,16 +375,20 @@ class AiscalatorConfig:
                          type_mismatch_exception=True)
         reference = data_file("../config/template/minimum_step.conf")
         ref = pyhocon.ConfigFactory.parse_file(reference)
-        for step in self._focused_steps:
-            msg = "in step named [" + step["name"] + "]"
-            validate_configs(step, ref["steps"][0], msg,
+        for step_name, step in self._focused_steps:
+            msg = "in step named " + step_name
+            validate_configs(step,
+                             ref["steps"]["Untitled"],
+                             msg,
                              missing_exception=True,
                              type_mismatch_exception=True)
         reference = data_file("../config/template/step.conf")
         ref = pyhocon.ConfigFactory.parse_file(reference)
-        for step in self._focused_steps:
-            msg = "in step named [" + step["name"] + "]"
-            validate_configs(step, ref["steps"][0], msg,
+        for step_name, step in self._focused_steps:
+            msg = "in step named " + step_name
+            validate_configs(step,
+                             ref["steps"]["Untitled"],
+                             msg,
                              missing_exception=False,
                              type_mismatch_exception=True)
 
@@ -451,7 +463,7 @@ def parse_step_config(step_config):
     Step configuration object
 
     """
-    if step_config is None:
+    if not step_config:
         return None
     if os.path.exists(step_config):
         conf = pyhocon.ConfigFactory.parse_file(step_config)
@@ -477,15 +489,86 @@ def select_steps(step_conf, steps_selection: list) -> list:
     Returns
     -------
     list
-        list of step selected configuration object
+        list of tuples of (step_name, step) of selected
+        configuration objects
     """
     result = []
+    tasks = []
     if step_conf:
+        tasks = find_tasks(step_conf["steps"])
         if steps_selection:
             for target_step in steps_selection:
-                for step in step_conf["steps"]:
-                    if step.name == target_step:
-                        result += [step]
+                for step_name, step in tasks:
+                    if step_name == target_step:
+                        result += [(step_name, step)]
         else:
-            result = [step_conf["steps"][0]]
+            result = [tasks[0]]
+    if steps_selection and not result:
+        msg = (" ".join(steps_selection) +
+               " was not found in step configurations.\n ")
+        if tasks:
+            msg += ("Available tasks are: " +
+                    " ".join([task_name for task_name, tasks in tasks]))
+        raise pyhocon.ConfigMissingException(msg)
     return result
+
+
+def find_tasks(tree: pyhocon.ConfigTree, path=""):
+    """
+    Find all Tasks objects in the Configuration object and report
+    their paths.
+
+    Parameters
+    ----------
+    tree : pyhocon.ConfigTree
+        Configuration object
+    path : str
+        path that was traversed to get to this tree
+
+    Returns
+    -------
+    list
+        list of names of Configuration objects containing a
+        definition of a section 'task'
+    """
+    result = []
+    if path:
+        next_path = path + "."
+    else:
+        next_path = ""
+    for key in tree.keys():
+        if key == 'task':
+            result += [(path, tree)]
+        else:
+            if isinstance(tree[key], pyhocon.config_tree.ConfigTree):
+                value = find_tasks(tree[key], path=next_path + key)
+                if value:
+                    result += value
+    return result
+
+
+def convert_to_format(file: str, output: str, output_format: str):
+    """
+    Converts a HOCON file to another format
+
+    Parameters
+    ----------
+    file : str
+        hocon file to convert
+    output : str
+        output file to produce
+    output_format : str
+        format of the output file
+
+    Returns
+    -------
+    str
+        the output file
+    """
+    (pyhocon
+     .converter
+     .HOCONConverter
+     .convert_from_file(file, output_file=output,
+                        output_format=output_format))
+    os.remove(file)
+    return output

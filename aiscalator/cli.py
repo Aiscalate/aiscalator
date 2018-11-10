@@ -44,6 +44,7 @@ def version():
 
 
 @main.command()
+@click.version_option(version=__version__)
 def setup():
     """Setup the configuration of AIscalator applications"""
     # TODO to implement
@@ -51,6 +52,7 @@ def setup():
 
 
 @main.command()
+@click.version_option(version=__version__)
 def cookiecutter():
     """Generates a cookiecutter project to AIscalate"""
     # TODO to implement

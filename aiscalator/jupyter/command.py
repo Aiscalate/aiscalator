@@ -24,7 +24,7 @@ from time import sleep
 import webbrowser
 
 from aiscalator.core.utils import copy_replace, subprocess_run, data_file
-from aiscalator.core.config import AiscalatorConfig
+from aiscalator.core.config import AiscalatorConfig, convert_to_format
 from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
 from aiscalator.jupyter.docker_image import build
 
@@ -266,17 +266,18 @@ def jupyter_edit(step: AiscalatorConfig):
     return ""
 
 
-def jupyter_new(name, path):
+def jupyter_new(name, path, output_format="hocon"):
     """
     Starts a Jupyter Lab environment configured to edit a brand new step
 
     Parameters
     ----------
-    name : string
+    name : str
         name of the new step
-    path : path
+    path : str
         path to where the new step files should be created
-
+    output_format : str
+        the format of the new configuration file to produce
     Returns
     -------
     string
@@ -286,6 +287,10 @@ def jupyter_new(name, path):
     makedirs(dirname(step_file), exist_ok=True)
     copy_replace(data_file("../config/template/step.conf"), step_file,
                  pattern="Untitled", replace_value=name)
+    if output_format != 'hocon':
+        file = join(path, name, name) + '.' + output_format
+        step_file = convert_to_format(step_file, output=file,
+                                      output_format=output_format)
 
     notebook_file = join(path, name, 'notebook', name) + '.ipynb'
     makedirs(dirname(notebook_file), exist_ok=True)

@@ -89,14 +89,24 @@ def prepare_build_dir(step, dst, input_docker_src):
     if isdir(input_docker_dir):
         dockerfile = input_docker_dir + "/Dockerfile"
         with TemporaryDirectory(prefix="aiscalator_") as tmp:
-            # TODO check app_config to see if we allow the following:
-            dockerfile = include_apt_package(step, dockerfile,
-                                             join(tmp, "apt_package"))
-            dockerfile = include_requirements(step, dockerfile,
-                                              join(tmp, "requirements"),
-                                              dst)
-            dockerfile = include_lab_extensions(step, dockerfile,
-                                                join(tmp, "lab_extension"))
+            settings = "jupyter.docker_image"
+            allow = (step.app_config_has(settings + ".allow_apt_packages") and
+                     step.app_config()[settings + ".allow_apt_packages"])
+            if allow:
+                dockerfile = include_apt_package(step, dockerfile,
+                                                 join(tmp, "apt_package"))
+            allow = (step.app_config_has(settings + ".allow_requirements") and
+                     step.app_config()[settings + ".allow_requirements"])
+            if allow:
+                dockerfile = include_requirements(step, dockerfile,
+                                                  join(tmp, "requirements"),
+                                                  dst)
+            allow = (step.app_config_has(settings +
+                                         ".allow_lab_extensions") and
+                     step.app_config()[settings + ".allow_lab_extensions"])
+            if allow:
+                dockerfile = include_lab_extensions(step, dockerfile,
+                                                    join(tmp, "lab_extension"))
             copy(dockerfile, dst + '/Dockerfile')
         for file in listdir(input_docker_dir):
             if file != "Dockerfile":

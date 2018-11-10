@@ -21,13 +21,42 @@ from click.testing import CliRunner
 
 from aiscalator import cli
 
-# FIXME implements tests !!!
 
-
-def test_command_line_interface():
+def test_cli_help_version():
     """Test the CLI."""
+    cli_tests = [
+        [],
+        ['--help'],
+        ['--version'],
+        ['version'],
+        ['airflow'],
+        ['airflow', '--help'],
+        ['airflow', '--version'],
+        ['airflow', "new", '--help'],
+        ['airflow', "run", '--help'],
+        ['airflow', "edit", '--help'],
+        ['airflow', "setup", '--help'],
+        ['airflow', "push", '--help'],
+        ['airflow', "start", '--help'],
+        ['airflow', "stop", '--help'],
+        ['jupyter'],
+        ['jupyter', '--help'],
+        ['jupyter', '--version'],
+        ['jupyter', "new", '--help'],
+        ['jupyter', "run", '--help'],
+        ['jupyter', "edit", '--help'],
+        ['jupyter', "setup", '--help'],
+        ['setup'],
+        ['setup', '--help'],
+        ['setup', '--version'],
+        ['cookiecutter'],
+        ['cookiecutter', '--help'],
+        ['cookiecutter', '--version'],
+    ]
     runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    help_result = runner.invoke(cli.main, ['--help'])
-    assert help_result.exit_code == 0
+    print()
+    for test in cli_tests:
+        msg = "Testing CLI with: " + " ".join(test) + " => status_code: "
+        result = runner.invoke(cli.main, test)
+        print(msg + str(result.exit_code))
+        assert result.exit_code == 0

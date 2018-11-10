@@ -1,1 +1,2 @@
-flake8
+flake8==3.6.0
+papermill==0.15.1
