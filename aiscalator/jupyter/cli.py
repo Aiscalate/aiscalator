@@ -48,10 +48,11 @@ def setup():
               metavar='<STEP>')
 @click.option('-f', '--format',
               help="format of the configuration file (default is hocon)",
-              type=click.Choice(['json', 'hocon']))
+              type=click.Choice(['json', 'hocon']),
+              default='hocon')
 # TODO: import an existing notebook and create a new aiscalate step from it
 @click.argument('path', type=click.Path())
-def new(name, output_format, path):
+def new(name, format, path):
     """Create a new notebook associated with a new aiscalate step config."""
     file_conf = os.path.join(path, name, name) + '.conf'
     file_json = os.path.join(path, name, name) + '.json'
@@ -61,7 +62,7 @@ def new(name, output_format, path):
         prompt_edit(file_json)
     else:
         click.echo(command.jupyter_new(name, path,
-                                       output_format=output_format))
+                                       output_format=format))
 
 
 def prompt_edit(file):

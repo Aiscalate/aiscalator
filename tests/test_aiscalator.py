@@ -23,7 +23,7 @@ from aiscalator import cli
 
 
 def test_cli_help_version():
-    """Test the CLI."""
+    """Test the CLI --help and --version."""
     cli_tests = [
         [],
         ['--help'],
@@ -56,7 +56,20 @@ def test_cli_help_version():
     runner = CliRunner()
     print()
     for test in cli_tests:
-        msg = "Testing CLI with: " + " ".join(test) + " => status_code: "
+        msg = "Testing CLI with: " + " ".join(test) + " => "
         result = runner.invoke(cli.main, test)
         print(msg + str(result.exit_code))
+        assert result.exit_code == 0
+
+
+def test_cli_jupyter():
+    """Test the CLI on Jupyter sub-commands."""
+    runner = CliRunner()
+    print()
+    with runner.isolated_filesystem():
+        test = ['jupyter', "new", "test", "--name", "test_name"]
+        msg = "Testing CLI with: " + " ".join(test) + " => "
+        print(msg)
+        result = runner.invoke(cli.main, test)
+
         assert result.exit_code == 0
