@@ -19,6 +19,7 @@ Various Utility functions
 """
 from logging import info
 import os
+import re
 from threading import Thread
 from subprocess import Popen, PIPE, STDOUT  # nosec
 
@@ -89,8 +90,10 @@ def copy_replace(src, dst, pattern='', replace_value=''):
         file2 = open(dst, 'w')
     else:
         file2 = dst
+    regex = re.compile(pattern, re.IGNORECASE)
     for line in file1:
-        file2.write(line.replace(pattern, replace_value))
+        # file2.write(line.replace(pattern, replace_value))
+        file2.write(re.sub(regex, replace_value, line))
     if isinstance(src, str):
         file1.close()
     if isinstance(dst, str):

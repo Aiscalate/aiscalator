@@ -18,37 +18,47 @@
 Implementations of commands for Airflow
 """
 import logging
-import os
+from os.path import isfile, join, dirname
+from tempfile import TemporaryDirectory
+
 from aiscalator.core.config import AiscalatorConfig
-from aiscalator.core.utils import subprocess_run
+from aiscalator.core.utils import subprocess_run, copy_replace
 
 
-def docker_compose(conf: AiscalatorConfig):
+def docker_compose(conf: AiscalatorConfig,
+                   extra_commands: list):
     """
-    Prepare a docker-compose command
+    Run the docker-compose command
 
     Parameters
     ----------
     conf : AiscalatorConfig
-       Configuration object for the application
-    Returns
-    -------
-    List
-        The array of commands to start a docker-compose
-        with the proper parameters
+        Configuration object for the application
+    extra_commands : list
+        list of sub-commands to run in docker-compose
+
     """
+    conf.validate_config()
     dockerfile = conf.find_user_config_file(
         "config/docker-compose-CeleryExecutor.yml"
     )
     commands = ["docker-compose"]
-    # for env in conf.user_env_file():
-    #     if os.path.isfile(env):
-    #        commands += ["--env-file", env]
-    commands += ["-f", dockerfile]
-    return commands
+    # Prepare a temp folder to run the command from
+    with TemporaryDirectory(prefix="aiscalator_") as tmp:
+        with open(join(tmp, ".env"), mode="w") as env_file:
+            # concatenate all the env files into one
+            for env in conf.user_env_file():
+                if isfile(env):
+                    with open(env, mode="r") as file:
+                        for line in file:
+                            env_file.write(line)
+        copy_replace(join(tmp, ".env"),
+                     join(dirname(dockerfile), ".env"))
+    commands += ["-f", dockerfile] + extra_commands
+    subprocess_run(commands, no_redirect=True)
 
 
-def airflow_setup(_: AiscalatorConfig):
+def airflow_setup(conf: AiscalatorConfig):
     """
     Setup the airflow configuration files and environment
 
@@ -61,6 +71,7 @@ def airflow_setup(_: AiscalatorConfig):
     # docker build --build-arg DOCKER_GID=`getent group docker |
     # cut -d ':' -f 3` --rm -t aiscalator/airflow .
     # TODO : to implement
+    conf.validate_config()
     logging.error("Not implemented yet")
 
 
@@ -74,8 +85,7 @@ def airflow_up(conf: AiscalatorConfig):
         Configuration object for the application
 
     """
-    commands = docker_compose(conf) + ["up", "-d"]
-    subprocess_run(commands, no_redirect=True)
+    docker_compose(conf, ["up", "-d"])
 
 
 def airflow_down(conf: AiscalatorConfig):
@@ -88,8 +98,7 @@ def airflow_down(conf: AiscalatorConfig):
         Configuration object for the application
 
     """
-    commands = docker_compose(conf) + ["down"]
-    subprocess_run(commands, no_redirect=True)
+    docker_compose(conf, ["down"])
 
 
 def airflow_cmd(conf: AiscalatorConfig, service="webserver", cmd=None):
@@ -105,11 +114,11 @@ def airflow_cmd(conf: AiscalatorConfig, service="webserver", cmd=None):
     cmd : list
         subcommands to run
     """
-    commands = docker_compose(conf) + [
+    commands = [
         "run", "--rm", service,
     ]
     if cmd is not None:
         commands += cmd
     else:
         commands += ["airflow"]
-    subprocess_run(commands, no_redirect=True)
+    docker_compose(conf, commands)
