@@ -1,12 +1,24 @@
+graft docs
+graft src
+graft ci
+graft tests
+
+include .bumpversion.cfg
+include .coveragerc
+include .cookiecutterrc
+include .editorconfig
+
 include AUTHORS.rst
 include CONTRIBUTING.rst
 include HISTORY.rst
 include LICENSE
 include README.rst
+include CODE_OF_CONDUCT.rst
+include FEATURES.rst
 
-recursive-include aiscalator *
-recursive-include tests *
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]
+include tox.ini .travis.yml appveyor.yml aiscalator-complete.sh
 
-recursive-include docs *.rst conf.py Makefile make.bat *.jpg *.png *.gif
+global-exclude *.py[cod] __pycache__ *.so *.dylib
+global-exclude  .codacy.* .github* _static* local* resources* docs/_build*
+global-exclude Makefile requirements_dev.txt
+

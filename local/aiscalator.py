@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Apache Software License 2.0
 #
 # Copyright (c) 2018, Christophe Duong
@@ -13,10 +14,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+helper module to run aiscalator from code
+"""
 import sys
+sys.path = [sys.path[0] + '/../src/'] + sys.path
 
 from aiscalator import cli
-
 
 if __name__ == "__main__":
     sys.exit(cli.main())  # pragma: no cover

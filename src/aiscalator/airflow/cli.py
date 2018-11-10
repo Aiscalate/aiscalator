@@ -18,11 +18,12 @@
 CLI module for Airflow related commands.
 """
 import logging
+
 import click
 
 from aiscalator import __version__
-from aiscalator.core.config import AiscalatorConfig
 from aiscalator.airflow import command
+from aiscalator.core.config import AiscalatorConfig
 
 
 @click.group()
@@ -33,12 +34,14 @@ def airflow():
 
 
 @airflow.command()
+@click.version_option(version=__version__)
 def setup():
     """Setup interactively the Airflow home folder and configurations."""
     click.echo(command.airflow_setup(AiscalatorConfig()))
 
 
 @airflow.command()
+@click.version_option(version=__version__)
 def start():
     """Start docker images to bring airflow services up."""
     click.echo(command.airflow_up(AiscalatorConfig()))
@@ -49,6 +52,7 @@ Flower: http://localhost:5555
 
 
 @airflow.command()
+@click.version_option(version=__version__)
 def stop():
     """Stop docker images to bring airflow services down."""
     click.echo(command.airflow_down(AiscalatorConfig()))
@@ -59,6 +63,7 @@ def stop():
               help='Run subcommand in docker service (default webserver)',
               metavar='<service>')
 @click.argument('subcommand', nargs=-1, required=True)
+@click.version_option(version=__version__)
 def run(service, subcommand):
     """Run sub-command in a running docker service."""
     if not subcommand:
@@ -71,6 +76,7 @@ def run(service, subcommand):
 
 
 @airflow.command()
+@click.version_option(version=__version__)
 def new():
     """Create a new DAG job"""
     # TODO to implement
@@ -78,6 +84,7 @@ def new():
 
 
 @airflow.command()
+@click.version_option(version=__version__)
 def edit():
     """Edit DAG job"""
     # TODO to implement
@@ -85,6 +92,7 @@ def edit():
 
 
 @airflow.command()
+@click.version_option(version=__version__)
 def push():
     """Push a job into the DAGS folder to schedule in Airflow."""
     # TODO to implement

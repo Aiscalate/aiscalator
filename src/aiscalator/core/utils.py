@@ -17,11 +17,13 @@
 """
 Various Utility functions
 """
-from logging import info
 import os
 import re
+from logging import info
+from subprocess import PIPE  # nosec
+from subprocess import STDOUT
+from subprocess import Popen
 from threading import Thread
-from subprocess import Popen, PIPE, STDOUT  # nosec
 
 
 def data_file(path):

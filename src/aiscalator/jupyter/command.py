@@ -17,15 +17,24 @@
 """
 Implementations of commands for Jupyter
 """
-from logging import info, debug
-from os import makedirs
-from os.path import basename, dirname, abspath, isfile, join, exists
-from time import sleep
 import webbrowser
+from logging import debug
+from logging import info
+from os import makedirs
+from os.path import abspath
+from os.path import basename
+from os.path import dirname
+from os.path import exists
+from os.path import isfile
+from os.path import join
+from time import sleep
 
-from aiscalator.core.utils import copy_replace, subprocess_run, data_file
-from aiscalator.core.config import AiscalatorConfig, convert_to_format
+from aiscalator.core.config import AiscalatorConfig
+from aiscalator.core.config import convert_to_format
 from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
+from aiscalator.core.utils import copy_replace
+from aiscalator.core.utils import data_file
+from aiscalator.core.utils import subprocess_run
 from aiscalator.jupyter.docker_image import build
 
 
@@ -144,40 +153,57 @@ def prepare_task_env(step: AiscalatorConfig):
     """
     commands = []
     if step.root_dir():
-        if step.has_step_field("task.modules_src_path"):
-            for value in step.step_field("task.modules_src_path"):
-                # TODO support readonly flag
-                # TODO handle URL
-                for i in value:
-                    if exists(step.root_dir() + i):
-                        commands += [
-                            "--mount",
-                            "type=bind,source=" +
-                            abspath(step.root_dir() + i) +
-                            ",target=/home/jovyan/work/modules/" + value[i]
-                        ]
-        if step.has_step_field("task.input_data_path"):
-            for value in step.step_field("task.input_data_path"):
-                # TODO handle URL
-                for i in value:
-                    if exists(step.root_dir() + i):
-                        commands += [
-                            "--mount",
-                            "type=bind,source=" +
-                            abspath(step.root_dir() + i) +
-                            ",target=/home/jovyan/work/data/input/" +
-                            value[i] + ",readonly"
-                        ]
-        if step.has_step_field("task.output_data_path"):
-            for value in step.step_field("task.output_data_path"):
-                for i in value:
-                    # TODO check URL and warn
+        commands += mount_path(step, "task.modules_src_path",
+                               "/home/jovyan/work/modules/")
+        commands += mount_path(step, "task.input_data_path",
+                               "/home/jovyan/work/data/input/",
+                               readonly=True)
+        commands += mount_path(step, "task.output_data_path",
+                               "/home/jovyan/work/data/output/",
+                               make_dirs=True)
+    return commands
+
+
+def mount_path(step: AiscalatorConfig, field, target_path,
+               readonly=False, make_dirs=False):
+    """
+    Returu commands to mount path from list field into the
+    docker image when running.
+
+    Parameters
+    ----------
+    step : AiscalatorConfig
+        Configuration object for the step
+    field : str
+        the field in the configuration step that contains the path
+    target_path : str
+        where to mount them inside the container
+    readonly : bool
+        flag to mount the path as read-only
+    make_dirs : bool
+        flag to create the folder on the host before mounting if
+        it doesn't exists.
+
+    Returns
+    -------
+    list
+        commands to mount all the paths from the field
+
+    """
+    commands = []
+    if step.has_step_field(field):
+        for value in step.step_field(field):
+            # TODO handle URL
+            for i in value:
+                if make_dirs:
                     makedirs(abspath(step.root_dir() + i), exist_ok=True)
+                if exists(step.root_dir() + i):
                     commands += [
                         "--mount",
                         "type=bind,source=" +
                         abspath(step.root_dir() + i) +
-                        ",target=/home/jovyan/work/data/output/" + value[i]
+                        ",target=" + target_path + value[i] +
+                        (",readonly" if readonly else "")
                     ]
     return commands
 

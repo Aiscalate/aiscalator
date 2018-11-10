@@ -23,6 +23,7 @@ this module defines all the entry points to the application.
 """
 import logging
 import sys
+
 import click
 
 from aiscalator import __version__
@@ -38,6 +39,7 @@ def main():
 
 
 @main.command()
+@click.version_option(version=__version__)
 def version():
     """Show the version and exit."""
     click.echo(sys.argv[0] + ', version ' + __version__)

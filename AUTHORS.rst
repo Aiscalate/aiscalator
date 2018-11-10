@@ -24,7 +24,10 @@ This software uses the following open source components:
 * Airflow_ under Apache-2_ license
 * Docker-Airflow_ under Apache-2_ license
 * Papermill_ under BSD-3-Clause_ license
-* This project was created with Cookiecutter_ under BSD-3-Clause_ license and the `audreyr/cookiecutter-pypackage`_ project template.
+* This project was created with Cookiecutter_ under BSD-3-Clause_ license
+* with the `audreyr/cookiecutter-pypackage`_ project template.
+* with the `ionelmc/cookiecutter-pylibrary`_ project template
+* PyHOCON_ under Apache-2_ license
 
 .. _Jupyter-Project: http://jupyter.org/
 .. _Jupytext: https://github.com/mwouts/jupytext
@@ -33,8 +36,10 @@ This software uses the following open source components:
 .. _Airflow: https://github.com/apache/incubator-airflow
 .. _Docker-Airflow: https://github.com/puckel/docker-airflow
 .. _Papermill: https://github.com/nteract/papermill
+.. _PyHOCON: https://github.com/chimpler/pyhocon
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+.. _`ionelmc/cookiecutter-pylibrary`: https://github.com/ionelmc/cookiecutter-pylibrary
 
 .. _BSD-3-Clause: https://opensource.org/licenses/BSD-3-Clause
 .. _MIT: https://opensource.org/licenses/MIT

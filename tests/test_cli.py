@@ -60,16 +60,3 @@ def test_cli_help_version():
         result = runner.invoke(cli.main, test)
         print(msg + str(result.exit_code))
         assert result.exit_code == 0
-
-
-def test_cli_jupyter():
-    """Test the CLI on Jupyter sub-commands."""
-    runner = CliRunner()
-    print()
-    with runner.isolated_filesystem():
-        test = ['jupyter', "new", "test", "--name", "test_name"]
-        msg = "Testing CLI with: " + " ".join(test) + " => "
-        print(msg)
-        result = runner.invoke(cli.main, test)
-
-        assert result.exit_code == 0

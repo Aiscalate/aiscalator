@@ -3,22 +3,65 @@ AIscalator
 ==========
 
 
-.. image:: https://img.shields.io/pypi/v/aiscalator.svg
-        :target: https://pypi.python.org/pypi/aiscalator
+.. start-badges
 
-.. image:: https://img.shields.io/travis/Aiscalate/aiscalator.svg
-        :target: https://travis-ci.org/Aiscalate/aiscalator
+.. list-table::
+    :stub-columns: 1
 
-.. image:: https://readthedocs.org/projects/aiscalator/badge/?version=latest
-        :target: https://aiscalator.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
+    * - docs
+      - |docs|
+    * - tests
+      - | |travis| |appveyor| |requires|
+        | |coveralls| |codecov|
+        | |scrutinizer| |codacy| |codeclimate|
+    * - package
+      - | |version| |commits-since|
 
-.. image:: https://requires.io/github/Aiscalate/aiscalator/requirements.svg?branch=master
-        :target: https://requires.io/github/Aiscalate/aiscalator/requirements/?branch=master
-        :alt: Requirements Status
+.. |docs| image:: https://readthedocs.org/projects/aiscalator/badge/?version=latest
+    :target: https://aiscalator.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
-.. image:: https://api.codacy.com/project/badge/Grade/16c9117a680041f382ba48bd5cf73ca2
-        :target: https://www.codacy.com/app/ChristopheDuong/aiscalator
+.. |travis| image:: https://travis-ci.org/Aiscalate/aiscalator.svg?branch=master
+    :alt: Travis-CI Build Status
+    :target: https://travis-ci.org/Aiscalate/aiscalator
+
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/Aiscalate/aiscalator?branch=master&svg=true
+    :alt: AppVeyor Build Status
+    :target: https://ci.appveyor.com/project/Aiscalate/aiscalator
+
+.. |requires| image:: https://requires.io/github/Aiscalate/aiscalator/requirements.svg?branch=master
+    :target: https://requires.io/github/Aiscalate/aiscalator/requirements/?branch=master
+    :alt: Requirements Status
+
+.. |coveralls| image:: https://coveralls.io/repos/Aiscalate/aiscalator/badge.svg?branch=master&service=github
+    :alt: Coverage Status
+    :target: https://coveralls.io/github/Aiscalate/aiscalator
+
+.. |codecov| image:: https://codecov.io/github/Aiscalate/aiscalator/coverage.svg?branch=master
+    :alt: Coverage Status
+    :target: https://codecov.io/github/Aiscalate/aiscalator
+
+.. |codacy| image:: https://api.codacy.com/project/badge/Grade/16c9117a680041f382ba48bd5cf73ca2
+    :target: https://www.codacy.com/app/ChristopheDuong/aiscalator
+
+.. |codeclimate| image:: https://codeclimate.com/github/Aiscalate/aiscalator/badges/gpa.svg
+   :target: https://codeclimate.com/github/Aiscalate/aiscalator
+   :alt: CodeClimate Quality Status
+
+.. |version| image:: https://img.shields.io/pypi/v/aiscalator.svg
+    :alt: PyPI Package latest release
+    :target: https://pypi.org/project/aiscalator/
+
+.. |commits-since| image:: https://img.shields.io/github/commits-since/Aiscalate/aiscalator/v0.1.0.svg
+    :alt: Commits since latest release
+    :target: https://github.com/Aiscalate/aiscalator/compare/v0.1.0...master
+
+.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/Aiscalate/aiscalator/master.svg
+    :alt: Scrutinizer Status
+    :target: https://scrutinizer-ci.com/g/Aiscalate/aiscalator/
+
+.. end-badges
+
 
 * Free software: Apache Software License 2.0
 * Website: http://www.aiscalate.com
@@ -142,3 +185,27 @@ Schedule AIscalator DAG into local airflow dags folder::
 
     aiscalator airflow push <aiscalator DAG>
 
+
+Development
+===========
+
+To run all the tests, run::
+
+    tox
+
+Note, to combine the coverage data from all the tox environments run:
+
+.. list-table::
+    :widths: 10 90
+    :stub-columns: 1
+
+    - - Windows
+      - ::
+
+            set PYTEST_ADDOPTS=--cov-append
+            tox
+
+    - - Other
+      - ::
+
+            PYTEST_ADDOPTS=--cov-append tox

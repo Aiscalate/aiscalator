@@ -17,46 +17,27 @@
 """
 Handles configurations files for the application
 """
-from datetime import datetime
-from platform import uname
-import logging
-from logging import config
 import os
-from urllib.error import HTTPError, URLError
 import uuid
+from datetime import datetime
+from logging import DEBUG
+from logging import Formatter
+from logging import StreamHandler
+from logging import debug
+from logging import getLogger
+from logging import warning
+from logging.config import dictConfig
+from platform import uname
 from tempfile import TemporaryDirectory
+from urllib.error import HTTPError
+from urllib.error import URLError
 
 import pyhocon
 from pytz import timezone
-from yaml import safe_load
 
 from aiscalator import __version__
-from aiscalator.core.utils import data_file, copy_replace
-
-
-def setup_logging():
-    """ Setup the logging configuration of the application """
-    log_level = os.getenv('AISCALATOR_LOG_LEVEL', None)
-    with open(data_file("../config/logging.yaml"), 'rt') as file:
-        path = load_logging_conf(file)
-    if not path:
-        logging.basicConfig(level=logging.INFO)
-    if log_level:
-        logging.root.setLevel(log_level)
-    msg = ("Starting " + os.path.basename(__name__) +
-           " version " + __version__ + " on " +
-           "_".join(uname()).replace(" ", "_"))
-    logging.debug(msg)
-
-
-def load_logging_conf(file):
-    """Reads and loads the logging configuration file"""
-    if file:
-        os.makedirs('/tmp/aiscalator/log', exist_ok=True)
-        conf = safe_load(file.read())
-        config.dictConfig(conf)
-        return file
-    return None
+from aiscalator.core.utils import copy_replace
+from aiscalator.core.utils import data_file
 
 
 def generate_global_config() -> str:
@@ -137,7 +118,7 @@ class AiscalatorConfig:
         """
         self._user_config_override = user_config_override
         self._app_conf = self.setup_app_config()
-        setup_logging()
+        self.setup_logging()
         self._step_config = step_config
         all_steps = parse_step_config(step_config)
         self._focused_steps = select_steps(all_steps, steps_selection)
@@ -156,7 +137,36 @@ class AiscalatorConfig:
             conf = pyhocon.ConfigFactory.parse_file(file)
         except FileNotFoundError:
             conf = pyhocon.ConfigFactory.parse_file(generate_global_config())
+        # test if since_version is deprecated and regenerate a newer config
         return conf
+
+    def setup_logging(self):
+        """ Setup the logging configuration of the application """
+        if self.app_config_has("logging"):
+            log_config = self.app_config()["logging"]
+            filename_list = [
+                v['filename'] for k, v in
+                find_config_tree(log_config, "filename")
+            ]
+            # pre-create directory in advance for all loggers
+            for file in filename_list:
+                file_dir = os.path.dirname(file)
+                if not os.path.isdir(file_dir):
+                    os.makedirs(file_dir, exist_ok=True)
+            dictConfig(log_config)
+        else:
+            logger = getLogger()
+            handler = StreamHandler()
+            formatter = Formatter(
+                "%(asctime)s-%(threadName)s-%(name)s-%(levelname)s-%(message)s"
+            )
+            handler.setFormatter(formatter)
+            logger.addHandler(handler)
+            logger.setLevel(DEBUG)
+        msg = ("Starting " + os.path.basename(__name__) +
+               " version " + __version__ + " on " +
+               "_".join(uname()).replace(" ", "_"))
+        debug(msg)
 
     def find_user_config_file(self, filename) -> str:
         """
@@ -413,41 +423,41 @@ def validate_configs(test, reference, path,
         when a field has type mismatch, raise xception?
 
     """
-    # TODO instead of exceptions, build a log of "compilation" errors...
-    for key in reference.keys():
-        if key not in test.keys():
-            msg = (path + ": Missing definition of " + key)
-            if missing_exception:
-                raise pyhocon.ConfigMissingException(
-                    message="Exception " + msg
-                )
-            else:
-                logging.warning("Warning %s", msg)
-        elif not isinstance(test[key], type(reference[key])):
-            msg = (path + ": Type mismatch of " + key + " found type " +
-                   str(type(test[key])) + " instead of " +
-                   str(type(reference[key])))
-            if type_mismatch_exception:
-                raise pyhocon.ConfigWrongTypeException(
-                    message="Exception " + msg
-                )
-            else:
-                logging.warning("Warning %s", msg)
-        elif (isinstance(test[key], pyhocon.config_tree.ConfigTree) and
-              isinstance(reference[key], pyhocon.config_tree.ConfigTree)):
-            # test recursively
-            validate_configs(test[key], reference[key],
-                             ".".join([path, key]),
-                             missing_exception,
-                             type_mismatch_exception)
-        elif (isinstance(test[key], list) and
-              isinstance(reference[key], list)):
-            # iterate through both collections
-            for i in test[key]:
-                for j in reference[key]:
-                    validate_configs(i, j, ".".join([path, key]),
-                                     missing_exception,
-                                     type_mismatch_exception)
+    if isinstance(reference, pyhocon.config_tree.ConfigTree):
+        for key in reference.keys():
+            if key not in test.keys():
+                msg = (path + ": Missing definition of " + key)
+                if missing_exception:
+                    raise pyhocon.ConfigMissingException(
+                        message="Exception " + msg
+                    )
+                else:
+                    warning("Warning %s", msg)
+            elif not isinstance(test[key], type(reference[key])):
+                msg = (path + ": Type mismatch of " + key + " found type " +
+                       str(type(test[key])) + " instead of " +
+                       str(type(reference[key])))
+                if type_mismatch_exception:
+                    raise pyhocon.ConfigWrongTypeException(
+                        message="Exception " + msg
+                    )
+                else:
+                    warning("Warning %s", msg)
+            elif (isinstance(test[key], pyhocon.config_tree.ConfigTree) and
+                  isinstance(reference[key], pyhocon.config_tree.ConfigTree)):
+                # test recursively
+                validate_configs(test[key], reference[key],
+                                 ".".join([path, key]),
+                                 missing_exception,
+                                 type_mismatch_exception)
+            elif (isinstance(test[key], list) and
+                  isinstance(reference[key], list)):
+                # iterate through both collections
+                for i in test[key]:
+                    for j in reference[key]:
+                        validate_configs(i, j, ".".join([path, key]),
+                                         missing_exception,
+                                         type_mismatch_exception)
 
 
 def parse_step_config(step_config):
@@ -495,7 +505,7 @@ def select_steps(step_conf, steps_selection: list) -> list:
     result = []
     tasks = []
     if step_conf:
-        tasks = find_tasks(step_conf["steps"])
+        tasks = find_config_tree(step_conf["steps"], 'task')
         if steps_selection:
             for target_step in steps_selection:
                 for step_name, step in tasks:
@@ -513,15 +523,17 @@ def select_steps(step_conf, steps_selection: list) -> list:
     return result
 
 
-def find_tasks(tree: pyhocon.ConfigTree, path=""):
+def find_config_tree(tree: pyhocon.ConfigTree, target_node, path=""):
     """
-    Find all Tasks objects in the Configuration object and report
+    Find all target_node objects in the Configuration object and report
     their paths.
 
     Parameters
     ----------
     tree : pyhocon.ConfigTree
         Configuration object
+    target_node : str
+        key of Config to find
     path : str
         path that was traversed to get to this tree
 
@@ -537,11 +549,12 @@ def find_tasks(tree: pyhocon.ConfigTree, path=""):
     else:
         next_path = ""
     for key in tree.keys():
-        if key == 'task':
+        if key == target_node:
             result += [(path, tree)]
         else:
             if isinstance(tree[key], pyhocon.config_tree.ConfigTree):
-                value = find_tasks(tree[key], path=next_path + key)
+                value = find_config_tree(tree[key], target_node,
+                                         path=next_path + key)
                 if value:
                     result += value
     return result

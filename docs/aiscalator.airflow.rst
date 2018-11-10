@@ -4,10 +4,10 @@ aiscalator.airflow package
 Submodules
 ----------
 
-aiscalator.airflow.airflow\_command module
-------------------------------------------
+aiscalator.airflow.command module
+-------------------------------------------
 
-.. automodule:: aiscalator.airflow.airflow_command
+.. automodule:: aiscalator.airflow.command
     :members:
     :undoc-members:
     :show-inheritance:

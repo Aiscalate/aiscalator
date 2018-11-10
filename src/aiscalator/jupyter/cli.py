@@ -36,6 +36,7 @@ def jupyter():
 
 
 @jupyter.command()
+@click.version_option(version=__version__)
 def setup():
     """Setup the docker image to run notebooks."""
     # TODO to implement
@@ -46,13 +47,14 @@ def setup():
 @click.option('--name', prompt='What is the name of your step?',
               help="Name of the new step to create",
               metavar='<STEP>')
-@click.option('-f', '--format',
+@click.option('-f', '--format', 'output_format',
               help="format of the configuration file (default is hocon)",
               type=click.Choice(['json', 'hocon']),
               default='hocon')
 # TODO: import an existing notebook and create a new aiscalate step from it
 @click.argument('path', type=click.Path())
-def new(name, format, path):
+@click.version_option(version=__version__)
+def new(name, output_format, path):
     """Create a new notebook associated with a new aiscalate step config."""
     file_conf = os.path.join(path, name, name) + '.conf'
     file_json = os.path.join(path, name, name) + '.json'
@@ -62,7 +64,7 @@ def new(name, format, path):
         prompt_edit(file_json)
     else:
         click.echo(command.jupyter_new(name, path,
-                                       output_format=format))
+                                       output_format=output_format))
 
 
 def prompt_edit(file):
@@ -92,6 +94,7 @@ def prompt_edit(file):
 @jupyter.command()
 @click.argument('conf', type=click.Path(exists=True))
 @click.argument('notebook', nargs=-1)
+@click.version_option(version=__version__)
 # TODO add parameters override from CLI
 def edit(conf, notebook):
     """Edit the notebook from an aiscalate config with JupyterLab."""
@@ -103,6 +106,7 @@ def edit(conf, notebook):
 @jupyter.command()
 @click.argument('conf', type=click.Path(exists=True))
 @click.argument('notebook', nargs=-1)
+@click.version_option(version=__version__)
 # TODO add parameters override from CLI
 def run(conf, notebook):
     """Run the notebook from an aiscalate config without GUI."""

@@ -2,12 +2,6 @@
 Usage
 =====
 
-First recommended but optional step is to make sure you have virtualenv installed
-and create an environment to try out AIscalator.
-(Note that you might need to install some prerequesite software for it to work)::
-
-    mkvirtualenv aiscalate
-
 The project is still in Alpha version, there is still a lot of work to be done.
 At the moment, you can install using two methods
 
@@ -23,7 +17,8 @@ At the moment, you can install using two methods
 
 After cloning the project, you can start testing the following commands at the moment::
 
-    aiscalator jupyter new src
-    aiscalator jupyter edit resources/example/example.json
-    aiscalator jupyter run resources/example/example.json
+    aiscalator jupyter new examples
+    ls -l examples/
+    aiscalator jupyter edit resources/example/example.conf
+    aiscalator jupyter run resources/example/example.conf
     aiscalator airflow start

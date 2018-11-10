@@ -4,6 +4,14 @@ aiscalator.jupyter package
 Submodules
 ----------
 
+aiscalator.jupyter.command module
+------------------------------------------
+
+.. automodule:: aiscalator.jupyter.command
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 aiscalator.jupyter.cli module
 -----------------------------
 
@@ -11,15 +19,6 @@ aiscalator.jupyter.cli module
     :members:
     :undoc-members:
     :show-inheritance:
-
-aiscalator.jupyter.docker\_command module
------------------------------------------
-
-.. automodule:: aiscalator.jupyter.docker_command
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

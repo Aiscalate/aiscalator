@@ -18,11 +18,14 @@
 Implementations of commands for Airflow
 """
 import logging
-from os.path import isfile, join, dirname
+from os.path import dirname
+from os.path import isfile
+from os.path import join
 from tempfile import TemporaryDirectory
 
 from aiscalator.core.config import AiscalatorConfig
-from aiscalator.core.utils import subprocess_run, copy_replace
+from aiscalator.core.utils import copy_replace
+from aiscalator.core.utils import subprocess_run
 
 
 def docker_compose(conf: AiscalatorConfig,

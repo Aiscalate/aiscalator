@@ -18,16 +18,21 @@
 Module responsible to build docker images for jupyter subcommands
 """
 from logging import debug
-from os import chdir, getcwd, listdir
-from os.path import isfile, join, isdir
+from os import chdir
+from os import getcwd
+from os import listdir
+from os.path import isdir
+from os.path import isfile
+from os.path import join
 from shlex import quote
-
 from shutil import copy
 from tempfile import TemporaryDirectory
 
-from aiscalator.core.utils import copy_replace, subprocess_run, data_file
 from aiscalator.core.config import AiscalatorConfig
 from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
+from aiscalator.core.utils import copy_replace
+from aiscalator.core.utils import data_file
+from aiscalator.core.utils import subprocess_run
 
 
 def build(step: AiscalatorConfig):
