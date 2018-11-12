@@ -17,13 +17,19 @@
 """
 Various Utility functions
 """
+import hashlib
+import logging
 import os
 import re
-from logging import info
+import webbrowser
+from shlex import quote
 from subprocess import PIPE  # nosec
 from subprocess import STDOUT
 from subprocess import Popen
 from threading import Thread
+from time import sleep
+
+from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
 
 
 def data_file(path):
@@ -68,7 +74,7 @@ def find(collection, item, field='name'):
     return None
 
 
-def copy_replace(src, dst, pattern='', replace_value=''):
+def copy_replace(src, dst, pattern=None, replace_value=None):
     """
     Copies a file from src to dst replacing pattern by replace_value
 
@@ -78,24 +84,37 @@ def copy_replace(src, dst, pattern='', replace_value=''):
         Path to the source filename to copy from
     dst : string
         Path to the output filename to copy to
-    pattern : string
-        Pattern to replace inside the src file
+    pattern
+        list of Patterns to replace inside the src file
     replace_value
-        Value to replace by in the dst file
+        list of Values to replace by in the dst file
 
     """
-    if isinstance(src, str):
-        file1 = open(src, 'r')
+    file1 = open(src, 'r') if isinstance(src, str) else src
+    file2 = open(dst, 'w') if isinstance(dst, str) else dst
+    pattern = (
+        [pattern] if isinstance(pattern, str)
+        else pattern
+    )
+    replace_value = (
+        [replace_value] if isinstance(replace_value, str)
+        else replace_value
+    )
+    if replace_value and pattern:
+        if len(replace_value) != len(pattern):
+            raise Exception("Invalid parameters: pattern and replace_value"
+                            " have different sizes.")
+        rules = [
+            (re.compile(regex, re.IGNORECASE), value)
+            for regex, value in zip(pattern, replace_value)
+        ]
     else:
-        file1 = src
-    if isinstance(dst, str):
-        file2 = open(dst, 'w')
-    else:
-        file2 = dst
-    regex = re.compile(pattern, re.IGNORECASE)
+        rules = []
     for line in file1:
-        # file2.write(line.replace(pattern, replace_value))
-        file2.write(re.sub(regex, replace_value, line))
+        if rules:
+            for rule in rules:
+                line = re.sub(rule[0], rule[1], line)
+        file2.write(line)
     if isinstance(src, str):
         file1.close()
     if isinstance(dst, str):
@@ -104,8 +123,9 @@ def copy_replace(src, dst, pattern='', replace_value=''):
 
 def log_info(pipe):
     """ Default logging function """
+    logger = logging.getLogger(__name__)
     for line in iter(pipe.readline, b''):
-        info(line)
+        logger.debug(line)
     return True
 
 
@@ -188,3 +208,79 @@ def subprocess_run(command, log_function=log_info,
         return process.wait()
     else:
         return BackgroundThreadRunner(command, log_function, no_redirect)
+
+
+def format_file_content(content, prefix="", suffix=""):
+    """
+    Reformat the content of a file line by line, adding prefix and suffix
+    strings.
+
+    Parameters
+    ----------
+    content : str
+        path to the file to reformat its content
+    prefix : str
+        add to each line this prefix string
+    suffix : str
+        add to each line this suffix string
+    Returns
+    -------
+    str
+        Formatted content of the file
+    """
+    result = ""
+    with open(content, "r") as file:
+        for line in file:
+            # TODO handle comments
+            # TODO check validity of the line for extra security
+            result += prefix + quote(line) + suffix
+    return result
+
+
+def sha256(file: str):
+    """
+    Reads a file content and returns its sha256 hash.
+
+    """
+    sha = hashlib.sha256()
+    with open(file, "rb") as content:
+        for line in content:
+            sha.update(line)
+    return sha.hexdigest()
+
+
+def wait_for_jupyter_lab(commands, logger, notebook, port, folder):
+    """
+
+    Parameters
+    ----------
+    commands
+    logger
+    notebook
+    port
+
+    Returns
+    -------
+
+    """
+    log = LogRegexAnalyzer(b'http://.*:8888/.token=([a-zA-Z0-9]+)\n')
+    logger.info("Running...: %s", " ".join(commands))
+    subprocess_run(commands, log_function=log.grep_logs, wait=False)
+    for i in range(5):
+        sleep(2)
+        if log.artifact():
+            break
+        msg = "docker run does not seem to be up yet..."
+        msg += " retrying (%s/5)"
+        logger.warning(msg, i)
+    if log.artifact():
+        # TODO handle url better (not always localhost?)
+        url = ("http://localhost:" + str(port) +
+               "/lab/tree/work/" + folder + "/" +
+               notebook + "?token=" +
+               log.artifact())
+        logger.info("%s is up and running.", url)
+        # TODO --no-browser option
+        webbrowser.open(url)
+        return url
+    return ""

@@ -1,0 +1,7 @@
+flake8==3.6.0
+jupyterhub==0.9.4
+jupyterlab==0.35.4
+jupytext==0.8.5
+notebook==5.7.0
+papermill==0.16.0
+pip==18.1

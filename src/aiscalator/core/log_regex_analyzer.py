@@ -17,7 +17,7 @@
 """
 Class to parse output logs from subprocess and catch particular expressions
 """
-from logging import info
+import logging
 from re import search
 
 
@@ -35,7 +35,7 @@ class LogRegexAnalyzer():
         Regular expression to search for in the logs
     """
 
-    def __init__(self, pattern=None):
+    def __init__(self, pattern=None, log_level=logging.DEBUG):
         """
         Parameters
         ----------
@@ -44,6 +44,7 @@ class LogRegexAnalyzer():
         """
         self._artifact = None
         self._pattern = pattern
+        self._log_level = log_level
 
 # https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
     def grep_logs(self, pipe):
@@ -55,9 +56,9 @@ class LogRegexAnalyzer():
         pipe
             Stream of logs to analyze
         """
+        logger = logging.getLogger(__name__)
         for line in iter(pipe.readline, b''):  # b'\n'-separated lines
-            # TODO improve logging in its own subprocess log file?
-            info(line)
+            logger.log(self._log_level, b'\n' + line)
             if self._pattern is not None:
                 match = search(self._pattern, line)
                 if match:

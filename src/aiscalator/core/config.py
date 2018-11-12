@@ -23,12 +23,9 @@ from datetime import datetime
 from logging import DEBUG
 from logging import Formatter
 from logging import StreamHandler
-from logging import debug
 from logging import getLogger
-from logging import warning
 from logging.config import dictConfig
 from platform import uname
-from tempfile import TemporaryDirectory
 from urllib.error import HTTPError
 from urllib.error import URLError
 
@@ -40,25 +37,33 @@ from aiscalator.core.utils import copy_replace
 from aiscalator.core.utils import data_file
 
 
-def generate_global_config() -> str:
+def _generate_global_config() -> str:
     """Generate a standard configuration file for the application in the
     user's home folder ~/.aiscalator/config/aiscalator.conf from the
     template file in aiscalator/config/template/aiscalator.conf
     """
+    logger = getLogger(__name__)
     dst = os.path.join(os.path.expanduser("~"),
                        ".aiscalator/config/aiscalator.conf")
-    now = '"' + str(datetime
-                    .utcnow()
-                    .replace(tzinfo=timezone("UTC"))) + '"'
-    with TemporaryDirectory() as tmp:
-        copy_replace(data_file("../config/template/aiscalator.conf"),
-                     os.path.join(tmp, "aiscalator.conf"),
-                     pattern="testUserID",
-                     replace_value=generate_user_id())
-        copy_replace(os.path.join(tmp, "aiscalator.conf"),
-                     dst,
-                     pattern="generation_date",
-                     replace_value=now)
+    logger.info("Generating a new configuration file for aiscalator:\n\t%s",
+                dst)
+    pattern = [
+        "testUserID",
+        "generation_date",
+    ]
+    replace_value = [
+        generate_user_id(),
+        '"' + str(datetime
+                  .utcnow()
+                  .replace(tzinfo=timezone("UTC"))) +
+        '" // in UTC timezone',
+    ]
+    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    copy_replace(data_file("../config/template/aiscalator.conf"),
+                 dst, pattern=pattern, replace_value=replace_value)
+    open(os.path.join(os.path.dirname(dst), "apt_packages.txt"), 'a').close()
+    open(os.path.join(os.path.dirname(dst), "requirements.txt"), 'a').close()
+    open(os.path.join(os.path.dirname(dst), "lab_extensions.txt"), 'a').close()
     return dst
 
 
@@ -71,6 +76,13 @@ def generate_user_id() -> str:
         setup was run first
     """
     return 'u' + str((uuid.getnode()))
+
+
+def _app_config_file() -> str:
+    """Return the path to the app configuration file."""
+    # TODO check env if overiden
+    return os.path.join(os.path.expanduser("~"), '.aiscalator',
+                        'config', 'aiscalator.conf')
 
 
 class AiscalatorConfig:
@@ -87,66 +99,58 @@ class AiscalatorConfig:
 
     Attributes
     ----------
-    _user_config_override : str
-        path to the specified user config
     _app_conf
         global configuration object for the application
-    _step_config : str
-        path to the step configuration (or plain configuration as string)
-    _focused_steps : list
-        list of selected steps
-    _step_it : int
-        index of the step being processed
+    _config_path : str
+        path to the configuration file (or plain configuration as string)
+    _step_name : str
+        name of the currently processed step
     _step
         configuration object for the currently processed step
+    _dag_name : str
+        name of the currently processed dag
+    _dag
+        configuration object for the currently processed dag
     """
     def __init__(self,
-                 user_config_override=None,
-                 step_config=None,
-                 steps_selection=None):
+                 config=None,
+                 step_selection=None,
+                 dag_selection=None):
         """
         Parameters
             ----------
-            user_config_override : str
-                path of the user configuration folder to override
-                the default one
-            step_config : str
+            config : str
                 path to the step configuration file (or plain configuration
                 string)
-            steps_selection : List
-                list of names of steps from the configuration file to focus on
+            step_selection : str
+                Name of step from the configuration file to focus on
+            dag_selection : str
+                Name of dag from the configuration file to focus on
         """
-        self._user_config_override = user_config_override
-        self._app_conf = self.setup_app_config()
-        self.setup_logging()
-        self._step_config = step_config
-        all_steps = parse_step_config(step_config)
-        self._focused_steps = select_steps(all_steps, steps_selection)
-        self._step_it = 0
-        self._step = self.next_step()
+        self._config_path = config
+        self._app_conf = _setup_app_config()
+        self._setup_logging()
+        parsed_config = _parse_config(config)
+        self._step_name, self._step = _select_config(parsed_config,
+                                                     root_node='steps',
+                                                     child_node='task',
+                                                     selection=step_selection)
+        self._dag_name, self._dag = _select_config(parsed_config,
+                                                   root_node='dags',
+                                                   child_node='definition',
+                                                   selection=dag_selection)
 
-    def setup_app_config(self):
-        """
-        Setup global application configuration.
-        If not found in the default location, this method will generate
-        a brand new one.
+    ###################################################
+    # Global App Config methods                       #
+    ###################################################
 
-        """
-        try:
-            file = self.find_user_config_file("config/aiscalator.conf")
-            conf = pyhocon.ConfigFactory.parse_file(file)
-        except FileNotFoundError:
-            conf = pyhocon.ConfigFactory.parse_file(generate_global_config())
-        # test if since_version is deprecated and regenerate a newer config
-        return conf
-
-    def setup_logging(self):
+    def _setup_logging(self):
         """ Setup the logging configuration of the application """
         if self.app_config_has("logging"):
             log_config = self.app_config()["logging"]
             filename_list = [
                 v['filename'] for k, v in
-                find_config_tree(log_config, "filename")
+                _find_config_tree(log_config, "filename")
             ]
             # pre-create directory in advance for all loggers
             for file in filename_list:
@@ -155,57 +159,83 @@ class AiscalatorConfig:
                     os.makedirs(file_dir, exist_ok=True)
             dictConfig(log_config)
         else:
-            logger = getLogger()
+            log = getLogger()
             handler = StreamHandler()
             formatter = Formatter(
                 "%(asctime)s-%(threadName)s-%(name)s-%(levelname)s-%(message)s"
             )
             handler.setFormatter(formatter)
-            logger.addHandler(handler)
-            logger.setLevel(DEBUG)
+            log.addHandler(handler)
+            log.setLevel(DEBUG)
         msg = ("Starting " + os.path.basename(__name__) +
                " version " + __version__ + " on " +
                "_".join(uname()).replace(" ", "_"))
-        debug(msg)
+        logger = getLogger(__name__)
+        logger.debug(msg)
 
-    def find_user_config_file(self, filename) -> str:
+    def app_config_home(self) -> str:
+        """Return the path to the app configuration folder."""
+        if self.app_config_has("app_config_home_directory"):
+            return self.app_config()["app_config_home_directory"]
+        return os.path.join(os.path.expanduser("~"), '.aiscalator')
+
+    def redefine_app_config_home(self, config_home):
         """
-        Looks for configuration files in the user configuration folder
+        Modify the configuration file to change the value of the
+        application configuration home directory.
 
         Parameters
         ----------
-        filename : str
-            file to search for
+        config_home : str
+            path to the new configuration home
 
         Returns
         -------
-        str
-            path to the filename in the user configuration folder
-
+        AiscalatorConfig
+            the new configuration object
         """
-        # TODO check user_config_folder override in environment
-        if self._user_config_override:
-            return os.path.join(self._user_config_override, filename)
-        # TODO url user config?
-        return os.path.join(os.path.expanduser("~"), '.aiscalator', filename)
+        dst = _app_config_file()
+        new_config = (
+            pyhocon.ConfigFactory.parse_string(
+                "aiscalator.app_config_home_directory = " + config_home
+            )
+        ).with_fallback(_app_config_file(), resolve=False)
+        with open(dst, "w") as output:
+            output.write(
+                pyhocon.converter.HOCONConverter.to_hocon(new_config)
+            )
+        self._app_conf = new_config
+        return new_config
 
-    def next_step(self):
+    def redefine_airflow_workspaces(self, workspaces):
         """
-        Iterates to the next configuration step from the list
-        of selected steps
+        Modify the configuration file to change the value of the
+        airflow workspaces
+
+        Parameters
+        ----------
+        workspaces : list
+            list of workspaces to bind to airflow
 
         Returns
         -------
-            the next configuration object
-
+        AiscalatorConfig
+            the new configuration object
         """
-        result = None
-        i = self._step_it
-        if i < len(self._focused_steps):
-            self._step_it += 1
-            result = self._focused_steps[i]
-        self._step = result
-        return result
+        dst = _app_config_file()
+        new_config = (
+            pyhocon.ConfigFactory.parse_string(
+                "aiscalator.airflow.setup.workspace_paths = [\n" +
+                "\n".join([ws for ws in workspaces]) +
+                "]"
+            )
+        ).with_fallback(_app_config_file(), resolve=False)
+        with open(dst, "w") as output:
+            output.write(
+                pyhocon.converter.HOCONConverter.to_hocon(new_config)
+            )
+        self._app_conf = new_config
+        return new_config
 
     def user_env_file(self) -> list:
         """
@@ -219,17 +249,11 @@ class AiscalatorConfig:
         """
         # TODO look if env file has been defined in the focused step
         # TODO look in user config if env file has been redefined
-        return [self.find_user_config_file("config/.env")]
+        return [
+            os.path.join(self.app_config_home(), "config", ".env")
+        ]
 
-    def notebook_output_path(self, notebook) -> str:
-        """Generates the name of the output notebook"""
-        return ("/home/jovyan/work/notebook_run/" +
-                os.path.basename(notebook).replace(".ipynb", "") + "_" +
-                self.timestamp_now() +
-                self.user_id() +
-                ".ipynb")
-
-    def timestamp_now(self) -> str:
+    def _timestamp_now(self) -> str:
         """
          Depending on how the timezone is configured, returns the
          timestamp for this instant.
@@ -251,6 +275,39 @@ class AiscalatorConfig:
         """
         return self._app_conf["aiscalator"]
 
+    def config_path(self):
+        """
+        Returns
+        -------
+        str
+            Returns the path to the step configuration file.
+            If it was an URL, it will return the path to the temporary
+            downloaded version of it.
+            If it was a plain string, then returns None
+
+        """
+        if os.path.exists(self._config_path):
+            if pyhocon.ConfigFactory.parse_file(self._config_path):
+                return os.path.abspath(self._config_path)
+        # TODO if string is url/git repo, download file locally first
+        return None
+
+    def root_dir(self):
+        """
+        Returns
+        -------
+        str
+            Returns the path to the folder containing the
+            configuration file
+        """
+        path = self.config_path()
+        if path:
+            root_dir = os.path.dirname(path)
+            if not root_dir.endswith("/"):
+                root_dir += "/"
+            return root_dir
+        return None
+
     def user_id(self) -> str:
         """
         Returns
@@ -258,7 +315,7 @@ class AiscalatorConfig:
         str
             the user id stored when the application was first setup
         """
-        return self.app_config()["user.id"]
+        return self.app_config()["metadata.user.id"]
 
     def app_config_has(self, field) -> bool:
         """
@@ -270,6 +327,79 @@ class AiscalatorConfig:
             return False
         return field in self.app_config()
 
+    def airflow_docker_compose_file(self):
+        """Return the configuration file to bring airflow services up."""
+        if self.app_config_has("airflow.docker_compose_file"):
+            return self.app_config()["airflow.docker_compose_file"]
+        return None
+
+    def validate_config(self):
+        """
+        Check if all the fields in the reference config are
+        defined in focused steps too. Otherwise
+        raise an Exception (either pyhocon.ConfigMissingException
+        or pyhocon.ConfigWrongTypeException)
+
+        """
+        reference = data_file("../config/template/minimum_aiscalator.conf")
+        ref = pyhocon.ConfigFactory.parse_file(reference)
+        msg = "In Global Application Configuration file "
+        _validate_configs(self._app_conf, ref, msg,
+                          missing_exception=True,
+                          type_mismatch_exception=True)
+        reference = data_file("../config/template/aiscalator.conf")
+        ref = pyhocon.ConfigFactory.parse_file(reference)
+        msg = "In Global Application Configuration file "
+        _validate_configs(self._app_conf, ref, msg,
+                          missing_exception=False,
+                          type_mismatch_exception=True)
+        if self._step_name:
+            reference = data_file("../config/template/minimum_step.conf")
+            ref = pyhocon.ConfigFactory.parse_file(reference)
+            msg = "in step named " + self._step_name
+            _validate_configs(self._step,
+                              ref["steps"]["Untitled"],
+                              msg,
+                              missing_exception=True,
+                              type_mismatch_exception=True)
+            reference = data_file("../config/template/step.conf")
+            ref = pyhocon.ConfigFactory.parse_file(reference)
+            msg = "in step named " + self._step_name
+            _validate_configs(self._step,
+                              ref["steps"]["Untitled"],
+                              msg,
+                              missing_exception=False,
+                              type_mismatch_exception=True)
+        if self._dag_name:
+            reference = data_file("../config/template/minimum_dag.conf")
+            ref = pyhocon.ConfigFactory.parse_file(reference)
+            msg = "in dag named " + self._dag_name
+            _validate_configs(self._dag,
+                              ref["dags"]["Untitled"],
+                              msg,
+                              missing_exception=True,
+                              type_mismatch_exception=True)
+            reference = data_file("../config/template/step.conf")
+            ref = pyhocon.ConfigFactory.parse_file(reference)
+            msg = "in dag named " + self._dag_name
+            _validate_configs(self._dag,
+                              ref["dags"]["Untitled"],
+                              msg,
+                              missing_exception=False,
+                              type_mismatch_exception=True)
+
+    ###################################################
+    # Step methods                                    #
+    ###################################################
+
+    def step_notebook_output_path(self, notebook) -> str:
+        """Generates the name of the output notebook"""
+        return ("/home/jovyan/work/notebook_run/" +
+                os.path.basename(notebook).replace(".ipynb", "") + "_" +
+                self._timestamp_now() +
+                self.user_id() +
+                ".ipynb")
+
     def step_field(self, field):
         """
         Returns the value associated with the field for the currently
@@ -277,7 +407,7 @@ class AiscalatorConfig:
 
         """
         if self.has_step_field(field):
-            return self._step[1][field]
+            return self._step[field]
         return None
 
     def has_step_field(self, field) -> bool:
@@ -288,50 +418,15 @@ class AiscalatorConfig:
         """
         if not self._step:
             return False
-        return field in self._step[1]
-
-    def step_config_path(self):
-        """
-        Returns
-        -------
-        str
-            Returns the path to the step configuration file.
-            If it was an URL, it will return the path to the temporary
-            downloaded version of it.
-            If it was a plain string, then returns None
-
-        """
-        if os.path.exists(self._step_config):
-            if pyhocon.ConfigFactory.parse_file(self._step_config):
-                return os.path.abspath(self._step_config)
-        # TODO if string is url/git repo, download file locally first
-        return None
+        return field in self._step
 
     def step_name(self):
         """
         Returns the name of the currently focused step
         """
-        if not self._step:
-            return None
-        return self._step[0]
+        return self._step_name
 
-    def root_dir(self):
-        """
-        Returns
-        -------
-        str
-            Returns the path to the folder containing the step
-            configuration file
-        """
-        path = self.step_config_path()
-        if path:
-            root_dir = os.path.dirname(path)
-            if not root_dir.endswith("/"):
-                root_dir += "/"
-            return root_dir
-        return None
-
-    def file_path(self, string):
+    def step_file_path(self, string):
         """
         Returns absolute path of a file from a field of the currently
         focused step.
@@ -346,15 +441,15 @@ class AiscalatorConfig:
                                                 self.step_field(string)))
         return os.path.abspath(self.step_field(string))
 
-    def container_name(self) -> str:
+    def step_container_name(self) -> str:
         """Return the docker container name to execute this step"""
         return (
             self.step_field("task.type") +
             "_" +
-            self.step_name()
+            self.step_name().replace(".", "_")
         )
 
-    def extract_parameters(self) -> list:
+    def step_extract_parameters(self) -> list:
         """Returns a list of docker parameters"""
         result = []
         if self.has_step_field("task.parameters"):
@@ -363,49 +458,77 @@ class AiscalatorConfig:
                     result += ["-p", key, param[key]]
         return result
 
-    def validate_config(self):
+    ###################################################
+    # DAG methods                                     #
+    ###################################################
+
+    def dag_field(self, field):
         """
-        Check if all the fields in the reference config are
-        defined in focused steps too. Otherwise
-        raise an Exception (either pyhocon.ConfigMissingException
-        or pyhocon.ConfigWrongTypeException)
+        Returns the value associated with the field for the currently
+        focused dag.
 
         """
-        reference = data_file("../config/template/minimum_aiscalator.conf")
-        ref = pyhocon.ConfigFactory.parse_file(reference)
-        msg = "In Global Application Configuration file "
-        validate_configs(self._app_conf, ref, msg,
-                         missing_exception=True,
-                         type_mismatch_exception=True)
-        reference = data_file("../config/template/aiscalator.conf")
-        ref = pyhocon.ConfigFactory.parse_file(reference)
-        msg = "In Global Application Configuration file "
-        validate_configs(self._app_conf, ref, msg,
-                         missing_exception=False,
-                         type_mismatch_exception=True)
-        reference = data_file("../config/template/minimum_step.conf")
-        ref = pyhocon.ConfigFactory.parse_file(reference)
-        for step_name, step in self._focused_steps:
-            msg = "in step named " + step_name
-            validate_configs(step,
-                             ref["steps"]["Untitled"],
-                             msg,
-                             missing_exception=True,
-                             type_mismatch_exception=True)
-        reference = data_file("../config/template/step.conf")
-        ref = pyhocon.ConfigFactory.parse_file(reference)
-        for step_name, step in self._focused_steps:
-            msg = "in step named " + step_name
-            validate_configs(step,
-                             ref["steps"]["Untitled"],
-                             msg,
-                             missing_exception=False,
-                             type_mismatch_exception=True)
+        if self.has_dag_field(field):
+            return self._dag[field]
+        return None
+
+    def has_dag_field(self, field) -> bool:
+        """
+        Tests if the currently focused dag has a configuration
+        value for the field.
+
+        """
+        if not self._dag:
+            return False
+        return field in self._dag
+
+    def dag_name(self):
+        """
+        Returns the name of the currently focused dag
+        """
+        return self._dag_name
+
+    def dag_file_path(self, string):
+        """
+        Returns absolute path of a file from a field of the currently
+        focused dag.
+
+        """
+        if not self.has_dag_field(string):
+            return None
+        # TODO handle url
+        root_dir = self.root_dir()
+        if root_dir:
+            return os.path.abspath(os.path.join(root_dir,
+                                                self.dag_field(string)))
+        return os.path.abspath(self.dag_field(string))
+
+    def dag_container_name(self) -> str:
+        """Return the docker container name to execute this step"""
+        return (
+            self.dag_name().replace(".", "_")
+        )
 
 
-def validate_configs(test, reference, path,
-                     missing_exception=True,
-                     type_mismatch_exception=True):
+def _setup_app_config():
+    """
+    Setup global application configuration.
+    If not found in the default location, this method will generate
+    a brand new one.
+
+    """
+    try:
+        file = _app_config_file()
+        conf = pyhocon.ConfigFactory.parse_file(file)
+    except FileNotFoundError:
+        conf = pyhocon.ConfigFactory.parse_file(_generate_global_config())
+    # test if since_version is deprecated and regenerate a newer config
+    return conf
+
+
+def _validate_configs(test, reference, path,
+                      missing_exception=True,
+                      type_mismatch_exception=True):
     """
     Recursively check two configs if they match
 
@@ -423,6 +546,7 @@ def validate_configs(test, reference, path,
         when a field has type mismatch, raise xception?
 
     """
+    logger = getLogger(__name__)
     if isinstance(reference, pyhocon.config_tree.ConfigTree):
         for key in reference.keys():
             if key not in test.keys():
@@ -432,7 +556,7 @@ def validate_configs(test, reference, path,
                         message="Exception " + msg
                     )
                 else:
-                    warning("Warning %s", msg)
+                    logger.warning("Warning %s", msg)
             elif not isinstance(test[key], type(reference[key])):
                 msg = (path + ": Type mismatch of " + key + " found type " +
                        str(type(test[key])) + " instead of " +
@@ -442,25 +566,25 @@ def validate_configs(test, reference, path,
                         message="Exception " + msg
                     )
                 else:
-                    warning("Warning %s", msg)
+                    logger.warning("Warning %s", msg)
             elif (isinstance(test[key], pyhocon.config_tree.ConfigTree) and
                   isinstance(reference[key], pyhocon.config_tree.ConfigTree)):
                 # test recursively
-                validate_configs(test[key], reference[key],
-                                 ".".join([path, key]),
-                                 missing_exception,
-                                 type_mismatch_exception)
+                _validate_configs(test[key], reference[key],
+                                  ".".join([path, key]),
+                                  missing_exception,
+                                  type_mismatch_exception)
             elif (isinstance(test[key], list) and
                   isinstance(reference[key], list)):
                 # iterate through both collections
                 for i in test[key]:
                     for j in reference[key]:
-                        validate_configs(i, j, ".".join([path, key]),
-                                         missing_exception,
-                                         type_mismatch_exception)
+                        _validate_configs(i, j, ".".join([path, key]),
+                                          missing_exception,
+                                          type_mismatch_exception)
 
 
-def parse_step_config(step_config):
+def _parse_config(step_config):
     """
     Interpret the step_config to produce a step configuration
     object. It could be provided as:
@@ -485,45 +609,53 @@ def parse_step_config(step_config):
     return conf
 
 
-def select_steps(step_conf, steps_selection: list) -> list:
+def _select_config(conf,
+                   root_node: str, child_node: str,
+                   selection: str):
     """
     Extract the list of step objects corresponding to
     the list of names provided.
 
     Parameters
     ----------
-    step_conf
+    conf
         step configuration object
-    steps_selection : list
-        list of names of step to extract
+    root_node : str
+        node to start looking from
+    child_node : str
+        node that represents the leaves we are searching
+        for. The path from root_node to child_node is compared
+        with selection to check for a match.
+    selection : str
+        name of node to extract
     Returns
     -------
-    list
-        list of tuples of (step_name, step) of selected
-        configuration objects
+        tuple of (node_name, node) of selected
+        configuration object
     """
-    result = []
-    tasks = []
-    if step_conf:
-        tasks = find_config_tree(step_conf["steps"], 'task')
-        if steps_selection:
-            for target_step in steps_selection:
-                for step_name, step in tasks:
-                    if step_name == target_step:
-                        result += [(step_name, step)]
+    result = (None, None)
+    candidates = []
+    if conf and root_node in conf:
+        candidates = _find_config_tree(conf[root_node], child_node)
+        if selection:
+            for name, candidate in candidates:
+                if name == selection:
+                    result = (name, candidate)
+                    break
         else:
-            result = [tasks[0]]
-    if steps_selection and not result:
-        msg = (" ".join(steps_selection) +
-               " was not found in step configurations.\n ")
-        if tasks:
-            msg += ("Available tasks are: " +
-                    " ".join([task_name for task_name, tasks in tasks]))
+            result = candidates[0]
+    if selection and not result:
+        msg = (selection + "'s " + child_node +
+               " was not found in " + root_node +
+               " configurations.\n ")
+        if candidates:
+            msg += ("Available candidates are: " +
+                    " ".join([name for name, _ in candidates]))
         raise pyhocon.ConfigMissingException(msg)
     return result
 
 
-def find_config_tree(tree: pyhocon.ConfigTree, target_node, path=""):
+def _find_config_tree(tree: pyhocon.ConfigTree, target_node, path="") -> list:
     """
     Find all target_node objects in the Configuration object and report
     their paths.
@@ -553,8 +685,8 @@ def find_config_tree(tree: pyhocon.ConfigTree, target_node, path=""):
             result += [(path, tree)]
         else:
             if isinstance(tree[key], pyhocon.config_tree.ConfigTree):
-                value = find_config_tree(tree[key], target_node,
-                                         path=next_path + key)
+                value = _find_config_tree(tree[key], target_node,
+                                          path=next_path + key)
                 if value:
                     result += value
     return result

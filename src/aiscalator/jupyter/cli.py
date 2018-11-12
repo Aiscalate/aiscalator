@@ -86,20 +86,19 @@ def prompt_edit(file):
             break
     msg += "edit " + file + " instead?"
     if click.confirm(msg, abort=True):
-        conf = AiscalatorConfig(step_config=file,
-                                steps_selection=[])
+        conf = AiscalatorConfig(config=file)
         click.echo(command.jupyter_edit(conf))
 
 
 @jupyter.command()
 @click.argument('conf', type=click.Path(exists=True))
-@click.argument('notebook', nargs=-1)
+@click.argument('notebook', nargs=1)
 @click.version_option(version=__version__)
 # TODO add parameters override from CLI
 def edit(conf, notebook):
     """Edit the notebook from an aiscalate config with JupyterLab."""
-    app_config = AiscalatorConfig(step_config=conf,
-                                  steps_selection=notebook)
+    app_config = AiscalatorConfig(config=conf,
+                                  step_selection=notebook)
     click.echo(command.jupyter_edit(app_config))
 
 
@@ -110,10 +109,11 @@ def edit(conf, notebook):
 # TODO add parameters override from CLI
 def run(conf, notebook):
     """Run the notebook from an aiscalate config without GUI."""
-    # TODO run multiple notebooks
-    # we have to stage notebooks with same dockerfile together,
-    # merge their requirements so that groups of notebooks can be
-    # run together in the same container sequentially
-    app_config = AiscalatorConfig(step_config=conf,
-                                  steps_selection=notebook)
-    click.echo(command.jupyter_run(app_config))
+    if notebook:
+        for note in notebook:
+            app_config = AiscalatorConfig(config=conf,
+                                          step_selection=note)
+            click.echo(command.jupyter_run(app_config))
+    else:
+        app_config = AiscalatorConfig(config=conf)
+        click.echo(command.jupyter_run(app_config))
