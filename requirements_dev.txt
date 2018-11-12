@@ -1,7 +1,7 @@
 apache-airflow==1.10.0
 bumpversion==0.5.3
 click==7.0
-coverage==4.5.1
+coverage==4.5.2
 flake8==3.6.0
 jupytext==0.8.4
 papermill==0.16.0
