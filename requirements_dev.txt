@@ -3,7 +3,7 @@ bumpversion==0.5.3
 click==7.0
 coverage==4.5.2
 flake8==3.6.0
-jupytext==0.8.4
+jupytext==0.8.5
 papermill==0.16.0
 pip==18.1
 pyhocon==0.3.47
