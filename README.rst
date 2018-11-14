@@ -11,7 +11,7 @@ AIscalator
     * - Docs
       - |docs|
     * - Tests
-      - | |travis| |appveyor| |requires|
+      - | |travis| |requires|
         | |coveralls| |codecov|
         | |scrutinizer| |codacy| |codeclimate|
     * - Package
@@ -24,10 +24,6 @@ AIscalator
 .. |travis| image:: https://travis-ci.org/Aiscalate/aiscalator.svg?branch=master
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/Aiscalate/aiscalator
-
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/ChristopheDuong/aiscalator?branch=master&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/ChristopheDuong/aiscalator
 
 .. |requires| image:: https://requires.io/github/Aiscalate/aiscalator/requirements.svg?branch=master
     :target: https://requires.io/github/Aiscalate/aiscalator/requirements/?branch=master
@@ -130,7 +126,9 @@ Build docker images to run Jupyter environments::
 
 Build docker image to run Airflow::
 
-    aiscalator airflow setup
+    aiscalator airflow setup <path-to-workspace-folder>
+    # for example,
+    aiscalator airflow setup $PWD
 
 
 Start working
@@ -151,19 +149,21 @@ Create a new Jupyter notebook to work on, define corresponding AIscalator step::
 
     aiscalator jupyter new <path-to-store-new-files>
     # For example,
-    aiscalator jupyter new src
+    aiscalator jupyter new project
+    # (CTRL + c to kill when done)
 
 Or you can edit an existing AIscalator step::
 
     aiscalator jupyter edit <aiscalator step>
     # For example, if you cloned the git repository:
-    aiscalator jupyter edit resources/example/example.json
+    aiscalator jupyter edit resources/example/example.conf
+    # (CTRL + c to kill when done)
 
 Run the step without GUI::
 
     aiscalator jupyter run <aiscalator task>
     # For example, if you cloned the git repository:
-    aiscalator jupyter run resources/example/example.json
+    aiscalator jupyter run resources/example/example.conf
 
 Airflow
 -------
@@ -174,14 +174,24 @@ Start Airflow services::
 
 Create a new AIscalator DAG, define the airflow job::
 
-    aiscalator airflow new
+    aiscalator airflow new <path-to-store-new-files>
+    # For example,
+    aiscalator airflow new project
+    # (CTRL + c to kill when done)
 
 Or you can edit an existing AIscalator DAG::
 
     aiscalator airflow edit <aiscalator DAG>
+    # For example, if you cloned the git repository:
+    aiscalator airflow edit resources/example/example.conf
+    # (CTRL + c to kill when done)
 
 Schedule AIscalator DAG into local airflow dags folder::
 
     aiscalator airflow push <aiscalator DAG>
+    # For example, if you cloned the git repository:
+    aiscalator airflow push resources/example/example.conf
 
+Stop Airflow services::
 
+    aiscalator airflow stop
