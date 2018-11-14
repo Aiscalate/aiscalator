@@ -8,7 +8,7 @@ papermill==0.16.1
 pip==18.1
 pyhocon==0.3.47
 pylint==2.1.1
-pytest==3.10.1
+pytest==4.0.0
 pytest-runner==4.2
 pytz==2018.7
 Sphinx==1.8.2
