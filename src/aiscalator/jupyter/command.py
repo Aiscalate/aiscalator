@@ -224,6 +224,8 @@ def jupyter_run(conf: AiscalatorConfig, prepare_only=False):
     logger = logging.getLogger(__name__)
     conf.validate_config()
     docker_image = build(conf)
+    if not docker_image:
+        raise Exception("Failed to build docker image")
     notebook = ("/home/jovyan/work/notebook/" +
                 os.path.basename(conf.step_file_path('task.code_path')))
     notebook_output = conf.step_notebook_output_path(notebook)
@@ -261,16 +263,18 @@ def jupyter_edit(conf: AiscalatorConfig):
     logger = logging.getLogger(__name__)
     conf.validate_config()
     docker_image = build(conf)
-    # TODO: shutdown other jupyter lab still running
-    notebook = os.path.basename(conf.step_field('task.code_path'))
-    if conf.step_extract_parameters():
-        jupyter_run(conf, prepare_only=True)
-    commands = _prepare_docker_env(conf, [
-        docker_image, "start.sh",
-        'jupyter', 'lab'
-    ])
-    return wait_for_jupyter_lab(commands, logger, notebook,
-                                10000, "notebook")
+    if docker_image:
+        # TODO: shutdown other jupyter lab still running
+        notebook = os.path.basename(conf.step_field('task.code_path'))
+        if conf.step_extract_parameters():
+            jupyter_run(conf, prepare_only=True)
+        commands = _prepare_docker_env(conf, [
+            docker_image, "start.sh",
+            'jupyter', 'lab'
+        ])
+        return wait_for_jupyter_lab(commands, logger, notebook,
+                                    10000, "notebook")
+    raise Exception("Failed to build docker image")
 
 
 def jupyter_new(name, path, output_format="hocon"):

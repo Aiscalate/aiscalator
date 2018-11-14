@@ -104,13 +104,17 @@ def new(name, output_format, path):
 
 @airflow.command()
 @click.argument('conf', type=click.Path(exists=True))
-@click.argument('notebook', nargs=1)
+@click.argument('notebook', nargs=-1)
 @click.version_option(version=__version__)
 def edit(conf, notebook):
     """Edit DAG job"""
-    app_config = AiscalatorConfig(config=conf,
-                                  step_selection=notebook)
-    click.echo(command.airflow_edit(app_config))
+    if len(notebook) < 2:
+        notebook = notebook[0] if notebook else None
+        app_config = AiscalatorConfig(config=conf,
+                                      step_selection=notebook)
+        click.echo(command.airflow_edit(app_config))
+    else:
+        raise click.BadArgumentUsage("Expecting one or less notebook names")
 
 
 @airflow.command()

@@ -17,12 +17,13 @@
 """
 Implementations of commands for Airflow
 """
-import grp
 import logging
 import re
+from grp import getgrgid
 from os import listdir
 from os import makedirs
 from os import remove
+from os import stat
 from os import symlink
 from os.path import abspath
 from os.path import basename
@@ -149,7 +150,8 @@ def airflow_up(conf: AiscalatorConfig):
 
     """
     if _docker_compose_grep(conf):
-        _airflow_docker_build(conf)
+        if not _airflow_docker_build(conf):
+            raise Exception("Failed to build docker image")
     _docker_compose(conf, ["up", "-d"])
 
 
@@ -193,10 +195,11 @@ def _airflow_docker_build(conf: AiscalatorConfig):
     conf.app_config_home()
     dockerfile_dir = utils.data_file("../config/docker/airflow")
     # TODO customize dockerfile with apt_packages, requirements etc
-    docker_gid = _find_docker_gid()
+    docker_gid, docker_group = _find_docker_gid_group()
     commands = [
         "docker", "build",
         "--build-arg", "DOCKER_GID=" + str(docker_gid),
+        "--build-arg", "DOCKER_GROUP=" + str(docker_group),
         "--rm", "-t", "aiscalator/airflow:latest",
         dockerfile_dir
     ]
@@ -216,12 +219,13 @@ def _airflow_docker_build(conf: AiscalatorConfig):
     return None
 
 
-def _find_docker_gid():
-    """Returns the group ID for unix group docker."""
-    groupinfo = grp.getgrnam('docker')
-    if groupinfo:
-        return groupinfo.gr_gid
-    return None
+def _find_docker_gid_group():
+    """Returns the group ID and name owning the /var/run/docker.sock file"""
+    stat_info = stat('/var/run/docker.sock')
+    if stat_info:
+        gid = stat_info.st_gid
+        return gid, getgrgid(gid)[0]
+    return None, None
 
 
 def airflow_down(conf: AiscalatorConfig):
@@ -273,14 +277,16 @@ def airflow_edit(conf: AiscalatorConfig):
     logger = logging.getLogger(__name__)
     conf.validate_config()
     docker_image = _airflow_docker_build(conf)
-    # TODO: shutdown other jupyter lab still running
-    port = 10001
-    notebook = basename(conf.dag_field('definition.code_path'))
-    commands = _prepare_docker_env(conf, [
-        "aiscalator/airflow:" + docker_image, 'jupyter', 'lab'
-    ], port)
-    return utils.wait_for_jupyter_lab(commands, logger, notebook,
-                                      port, "dags")
+    if docker_image:
+        # TODO: shutdown other jupyter lab still running
+        port = 10001
+        notebook = basename(conf.dag_field('definition.code_path'))
+        commands = _prepare_docker_env(conf, [
+            "aiscalator/airflow:" + docker_image, 'jupyter', 'lab'
+        ], port)
+        return utils.wait_for_jupyter_lab(commands, logger, notebook,
+                                          port, "dags")
+    raise Exception("Failed to build docker image")
 
 
 def _prepare_docker_env(conf: AiscalatorConfig, program, port):

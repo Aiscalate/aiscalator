@@ -8,9 +8,10 @@ LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
 
 ARG AIRFLOW_HOME=/usr/local/airflow
 ARG DOCKER_GID
+ARG DOCKER_GROUP
 # Reuse host GID for docker group in container
 USER root
-RUN groupadd -r -g ${DOCKER_GID} docker
+RUN groupadd -r -g ${DOCKER_GID} ${DOCKER_GROUP} || true
 
 ENV HOME ${AIRFLOW_HOME}
 
@@ -75,7 +76,7 @@ COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 COPY jupyter_notebook_config.txt ${AIRFLOW_HOME}/.jupyter/jupyter_notebook_config.py
 
 RUN chown -R airflow: ${AIRFLOW_HOME}
-RUN usermod -a -G docker airflow
+RUN usermod -a -G ${DOCKER_GROUP} airflow
 
 EXPOSE 8080 5555 8793 8888
 
