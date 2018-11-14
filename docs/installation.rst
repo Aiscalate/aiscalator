@@ -63,8 +63,8 @@ We would recommend using Homebrew_ to install pyenv_. Best practices
 would also to be using virtualenv and virtualenvwrapper.
 
 
-.. _Homebrew: http://brew.sh/
-.. _pyenv: https://github.com/pyenv/pyenv#homebrew-on-macos
+.. _Homebrew: https://brew.sh/
+.. _pyenv: https://github.com/pyenv/pyenv
 
 .. code-block:: console
 
