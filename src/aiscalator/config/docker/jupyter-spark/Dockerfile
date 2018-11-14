@@ -10,21 +10,21 @@ LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
 COPY install-jupytext.sh /home/jovyan/install-jupytext.sh
 
 RUN pip install pip==18.1 \
-    && pip install papermill==0.15.1 \
+    && pip install papermill==0.16.0 \
     && pip install flake8==3.6.0 \
-    && pip install jupytext==0.8.4 \
+    && pip install jupytext==0.8.5 \
     && jupyter labextension install "@jupyterlab/celltags" \
     && bash "/home/jovyan/install-jupytext.sh" \
     && rm "/home/jovyan/install-jupytext.sh"
 
 # optional additional apt_packages.txt:
-#apt_packages.txt#
+# apt_packages.txt #
 
 # optional additional requirements.txt:
-#requirements.txt#
+# requirements.txt #
 
 # optional additional lab_extensions.txt:
-#lab_extensions.txt#
+# lab_extensions.txt #
 
 RUN mkdir -p "/home/jovyan/work/notebook_run/" \
     && mkdir -p "/home/jovyan/work/modules/"

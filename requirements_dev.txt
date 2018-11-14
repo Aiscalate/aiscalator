@@ -3,15 +3,13 @@ bumpversion==0.5.3
 click==7.0
 coverage==4.5.2
 flake8==3.6.0
-jupytext==0.8.5
-papermill==0.16.1
+isort==4.3.4
 pip==18.1
 pyhocon==0.3.47
 pylint==2.1.1
 pytest==4.0.0
 pytest-runner==4.2
 pytz==2018.7
-Sphinx==1.8.2
 tox==3.5.3
 twine==1.12.1
 wheel==0.32.2

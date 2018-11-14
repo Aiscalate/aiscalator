@@ -17,32 +17,29 @@
 """
 Module responsible to build docker images for jupyter subcommands
 """
-from logging import debug
+import logging
 from os import chdir
 from os import getcwd
 from os import listdir
 from os.path import isdir
 from os.path import isfile
 from os.path import join
-from shlex import quote
 from shutil import copy
 from tempfile import TemporaryDirectory
 
+from aiscalator.core import utils
 from aiscalator.core.config import AiscalatorConfig
 from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
-from aiscalator.core.utils import copy_replace
-from aiscalator.core.utils import data_file
-from aiscalator.core.utils import subprocess_run
 
 
-def build(step: AiscalatorConfig):
+def build(conf: AiscalatorConfig):
     """
     Builds the docker image following the parameters specified in the
     focused step's configuration file
 
     Parameters
     ----------
-    step : AiscalatorConfig
+    conf : AiscalatorConfig
         Configuration object for this step
 
     Returns
@@ -50,22 +47,23 @@ def build(step: AiscalatorConfig):
     string
         the docker artifact name of the image built
     """
-    input_docker_src = step.step_field("docker_image.input_docker_src")
+    input_docker_src = conf.step_field("docker_image.input_docker_src")
     # TODO check if input_docker_src refers to an existing docker image
     # in which case, if no customization is needed, no need to build
     cwd = getcwd()
+    result = None
     try:
         # Prepare a temp folder to build docker image
         with TemporaryDirectory(prefix="aiscalator_") as tmp:
-            prepare_build_dir(step, tmp, input_docker_src)
+            _prepare_build_dir(conf, tmp, input_docker_src)
             chdir(tmp)
-            result = run_build(step)
+            result = _run_build(conf)
     finally:
         chdir(cwd)
     return result
 
 
-def prepare_build_dir(step, dst, input_docker_src):
+def _prepare_build_dir(conf, dst, input_docker_src):
     """
     Copies all necessary files for building docker images in a tmp folder,
     substituting some specific macros accordingly to handle customized
@@ -76,7 +74,7 @@ def prepare_build_dir(step, dst, input_docker_src):
 
     Parameters
     ----------
-    step : AiscalatorConfig
+    conf : AiscalatorConfig
         Configuration object for this step
     dst : str
         temporary folder where to prepare the files
@@ -84,41 +82,43 @@ def prepare_build_dir(step, dst, input_docker_src):
         name of the dockerfile package to use
 
     """
-    input_docker_dir = data_file("../config/docker/" + input_docker_src)
+    input_docker_dir = utils.data_file("../config/docker/" + input_docker_src)
 
-    if step.app_config_has("jupyter.dockerfile_src"):
+    if conf.app_config_has("jupyter.dockerfile_src"):
         # dockerfile is redefined in application configuration
-        dockerfile_src = step.app_config()["jupyter.dockerfile_src"]
-        input_docker_dir = find_docker_src(input_docker_src, dockerfile_src)
+        dockerfile_src = conf.app_config()["jupyter.dockerfile_src"]
+        input_docker_dir = _find_docker_src(input_docker_src, dockerfile_src)
 
     if isdir(input_docker_dir):
         dockerfile = input_docker_dir + "/Dockerfile"
         with TemporaryDirectory(prefix="aiscalator_") as tmp:
             settings = "jupyter.docker_image"
-            allow = (step.app_config_has(settings + ".allow_apt_packages") and
-                     step.app_config()[settings + ".allow_apt_packages"])
+            allow = (conf.app_config_has(settings + ".allow_apt_packages") and
+                     conf.app_config()[settings + ".allow_apt_packages"])
             if allow:
-                dockerfile = include_apt_package(step, dockerfile,
-                                                 join(tmp, "apt_package"))
-            allow = (step.app_config_has(settings + ".allow_requirements") and
-                     step.app_config()[settings + ".allow_requirements"])
+                dockerfile = _include_apt_package(conf, dockerfile,
+                                                  join(tmp, "apt_package"))
+            allow = (conf.app_config_has(settings + ".allow_requirements") and
+                     conf.app_config()[settings + ".allow_requirements"])
             if allow:
-                dockerfile = include_requirements(step, dockerfile,
-                                                  join(tmp, "requirements"),
-                                                  dst)
-            allow = (step.app_config_has(settings +
+                dockerfile = _include_requirements(conf, dockerfile,
+                                                   join(tmp, "requirements"),
+                                                   dst)
+            allow = (conf.app_config_has(settings +
                                          ".allow_lab_extensions") and
-                     step.app_config()[settings + ".allow_lab_extensions"])
+                     conf.app_config()[settings + ".allow_lab_extensions"])
             if allow:
-                dockerfile = include_lab_extensions(step, dockerfile,
-                                                    join(tmp, "lab_extension"))
+                dockerfile = _include_lab_extensions(conf, dockerfile,
+                                                     join(tmp,
+                                                          "lab_extension"))
             copy(dockerfile, dst + '/Dockerfile')
+        # copy the other files other than Dockerfile
         for file in listdir(input_docker_dir):
             if file != "Dockerfile":
                 copy(join(input_docker_dir, file), join(dst, file))
 
 
-def find_docker_src(input_docker_src, dirs):
+def _find_docker_src(input_docker_src, dirs):
     """
     Finds a pre-configured dockerfile package or return the default one.
 
@@ -137,16 +137,16 @@ def find_docker_src(input_docker_src, dirs):
     for src in dirs:
         if isfile(join(src, input_docker_src, "Dockerfile")):
             return src
-    return data_file("../config/docker/" + input_docker_src)
+    return utils.data_file("../config/docker/" + input_docker_src)
 
 
-def include_apt_package(step: AiscalatorConfig, dockerfile, tmp):
+def _include_apt_package(conf: AiscalatorConfig, dockerfile, tmp):
     """
     Include apt-install packages into the dockerfile
 
     Parameters
     ----------
-    step : AiscalatorConfig
+    conf : AiscalatorConfig
         Configuration object for this step
     dockerfile : str
         path to the dockerfile to modify
@@ -157,9 +157,9 @@ def include_apt_package(step: AiscalatorConfig, dockerfile, tmp):
     -------
         path to the resulting dockerfile
     """
-    if step.has_step_field("docker_image.apt_package_path"):
-        content = step.file_path("docker_image.apt_package_path")
-        value = format_file_content(content, suffix="\\\n")
+    if conf.has_step_field("docker_image.apt_package_path"):
+        content = conf.step_file_path("docker_image.apt_package_path")
+        value = utils.format_file_content(content, suffix="\\\n")
         if value:
             value = ("RUN apt-get install -yqq \\\n" + value + """
     && apt-get purge --auto-remove -yqq $buildDeps \\
@@ -173,20 +173,20 @@ def include_apt_package(step: AiscalatorConfig, dockerfile, tmp):
         /usr/share/doc \\
         /usr/share/doc-base
         """)
-            copy_replace(dockerfile, tmp,
-                         pattern="#apt_packages.txt#",
-                         replace_value=value)
+            utils.copy_replace(dockerfile, tmp,
+                               pattern="# apt_packages.txt #",
+                               replace_value=value)
             return tmp
     return dockerfile
 
 
-def include_requirements(step: AiscalatorConfig, dockerfile, tmp, dst):
+def _include_requirements(conf: AiscalatorConfig, dockerfile, tmp, dst):
     """
         Include pip install packages into the dockerfile
 
         Parameters
         ----------
-        step : AiscalatorConfig
+        conf : AiscalatorConfig
             Configuration object for this step
         dockerfile : str
             path to the dockerfile to modify
@@ -199,12 +199,12 @@ def include_requirements(step: AiscalatorConfig, dockerfile, tmp, dst):
         -------
             path to the resulting dockerfile
         """
-    if step.has_step_field("docker_image.requirements_path"):
-        content = step.file_path("docker_image.requirements_path")
+    if conf.has_step_field("docker_image.requirements_path"):
+        content = conf.step_file_path("docker_image.requirements_path")
         copy(content, join(dst, 'requirements.txt'))
-        copy_replace(dockerfile, tmp,
-                     pattern="#requirements.txt#",
-                     replace_value="""
+        utils.copy_replace(dockerfile, tmp,
+                           pattern="# requirements.txt #",
+                           replace_value="""
     COPY requirements.txt requirements.txt
     RUN pip install -r requirements.txt
     RUN rm requirements.txt""")
@@ -212,13 +212,13 @@ def include_requirements(step: AiscalatorConfig, dockerfile, tmp, dst):
     return dockerfile
 
 
-def include_lab_extensions(step: AiscalatorConfig, dockerfile, tmp):
+def _include_lab_extensions(conf: AiscalatorConfig, dockerfile, tmp):
     """
         Include jupyter lab extensions packages into the dockerfile
 
         Parameters
         ----------
-        step : AiscalatorConfig
+        conf : AiscalatorConfig
             Configuration object for this step
         dockerfile : str
             path to the dockerfile to modify
@@ -229,54 +229,27 @@ def include_lab_extensions(step: AiscalatorConfig, dockerfile, tmp):
         -------
             path to the resulting dockerfile
         """
-    if step.has_step_field("docker_image.lab_extension_path"):
-        content = step.file_path("docker_image.lab_extension_path")
+    if conf.has_step_field("docker_image.lab_extension_path"):
+        content = conf.step_file_path("docker_image.lab_extension_path")
         prefix = "&& jupyter labextension install "
-        value = format_file_content(content,
-                                    prefix=prefix, suffix=" \\\n")
+        value = utils.format_file_content(content,
+                                          prefix=prefix, suffix=" \\\n")
         if value:
             value = "RUN echo 'Installing Jupyter Extensions' \\\n" + value
-            copy_replace(dockerfile, tmp,
-                         pattern="#lab_extensions.txt#",
-                         replace_value=value)
+            utils.copy_replace(dockerfile, tmp,
+                               pattern="# lab_extensions.txt #",
+                               replace_value=value)
             return tmp
     return dockerfile
 
 
-def format_file_content(content, prefix="", suffix=""):
-    """
-    Reformat the content of a file line by line, adding prefix and suffix
-    strings.
-
-    Parameters
-    ----------
-    content : str
-        path to the file to reformat its content
-    prefix : str
-        add to each line this prefix string
-    suffix : str
-        add to each line this suffix string
-    Returns
-    -------
-    str
-        Formatted content of the file
-    """
-    result = ""
-    with open(content, "r") as file:
-        for line in file:
-            # TODO handle comments
-            # TODO check validity of the line for extra security
-            result += prefix + quote(line) + suffix
-    return result
-
-
-def run_build(step: AiscalatorConfig):
+def _run_build(conf: AiscalatorConfig):
     """
     Run the docker build command to produce the image and tag it.
 
     Parameters
     ----------
-    step : AiscalatorConfig
+    conf : AiscalatorConfig
         Configuration object for this step
 
     Returns
@@ -284,26 +257,27 @@ def run_build(step: AiscalatorConfig):
     str
         the docker image ID that was built
     """
+    logger = logging.getLogger(__name__)
     commands = ["docker", "build", "--rm"]
     output_docker_name = None
-    if step.has_step_field("docker_image.output_docker_name"):
-        output_docker_name = step.step_field("docker_image.output_docker_name")
+    if conf.has_step_field("docker_image.output_docker_name"):
+        output_docker_name = conf.step_field("docker_image.output_docker_name")
         commands += ["-t", output_docker_name + ":latest"]
     commands += ["."]
-    debug("Running...: " + " ".join(commands))
-    logger = LogRegexAnalyzer(b'Successfully built ([a-zA-Z0-9]+)\n')
-    subprocess_run(commands, log_function=logger.grep_logs)
-    result = logger.artifact()
+    log = LogRegexAnalyzer(b'Successfully built ([a-zA-Z0-9]+)\n')
+    logger.info("Running...: %s", " ".join(commands))
+    utils.subprocess_run(commands, log_function=log.grep_logs)
+    result = log.artifact()
     test = (
         result and
         output_docker_name is not None and
-        step.has_step_field("docker_image.output_docker_tag")
+        conf.has_step_field("docker_image.output_docker_tag")
     )
     if test:
         commands = ["docker", "tag"]
-        output_docker_tag = step.step_field("docker_image.output_docker_tag")
+        output_docker_tag = conf.step_field("docker_image.output_docker_tag")
         commands += [result, output_docker_name + ":" + output_docker_tag]
         # TODO implement docker tag output_docker_tag_commit_hash
-        debug("Running...: " + " ".join(commands))
-        subprocess_run(commands)
+        logger.info("Running...: %s", " ".join(commands))
+        utils.subprocess_run(commands)
     return result

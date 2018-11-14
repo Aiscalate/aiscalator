@@ -8,13 +8,13 @@ AIscalator
 .. list-table::
     :stub-columns: 1
 
-    * - docs
+    * - Docs
       - |docs|
-    * - tests
+    * - Tests
       - | |travis| |appveyor| |requires|
         | |coveralls| |codecov|
         | |scrutinizer| |codacy| |codeclimate|
-    * - package
+    * - Package
       - | |version| |commits-since|
 
 .. |docs| image:: https://readthedocs.org/projects/aiscalator/badge/?version=latest
@@ -25,9 +25,9 @@ AIscalator
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/Aiscalate/aiscalator
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/Aiscalate/aiscalator?branch=master&svg=true
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/ChristopheDuong/aiscalator?branch=master&svg=true
     :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/Aiscalate/aiscalator
+    :target: https://ci.appveyor.com/project/ChristopheDuong/aiscalator
 
 .. |requires| image:: https://requires.io/github/Aiscalate/aiscalator/requirements.svg?branch=master
     :target: https://requires.io/github/Aiscalate/aiscalator/requirements/?branch=master
@@ -106,7 +106,6 @@ Install AIscalator tool::
 
     git clone https://github.com/Aiscalate/aiscalator.git
     cd aiscalator/
-    pip install -r requirements_dev.txt
     make install
 
 Great, we are now ready to use the AIscalator!
@@ -186,26 +185,3 @@ Schedule AIscalator DAG into local airflow dags folder::
     aiscalator airflow push <aiscalator DAG>
 
 
-Development
-===========
-
-To run all the tests, run::
-
-    tox
-
-Note, to combine the coverage data from all the tox environments run:
-
-.. list-table::
-    :widths: 10 90
-    :stub-columns: 1
-
-    - - Windows
-      - ::
-
-            set PYTEST_ADDOPTS=--cov-append
-            tox
-
-    - - Other
-      - ::
-
-            PYTEST_ADDOPTS=--cov-append tox
