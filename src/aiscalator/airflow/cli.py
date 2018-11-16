@@ -52,6 +52,24 @@ def setup(config_home, append, workspace):
 
 @airflow.command()
 @click.version_option(version=__version__)
+def update():
+    """
+    Checks and tries to update the current docker image
+    to run airflow to a newer version.
+
+    Initiates a docker pull of the latest images we are depending on
+    and build the next aiscalator images from there.
+    Before replacing the version tags in the Dockerfile, we make sure
+    to do a maximum in the background while still having a working
+    image in the meantime.
+
+    """
+    # TODO to implement
+    logging.error("Not implemented yet")
+
+
+@airflow.command()
+@click.version_option(version=__version__)
 def start():
     """Start docker images to bring airflow services up."""
     click.echo(command.airflow_up(AiscalatorConfig()))

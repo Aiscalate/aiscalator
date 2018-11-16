@@ -10,7 +10,7 @@ LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
 COPY install-jupytext.sh /home/jovyan/install-jupytext.sh
 
 RUN pip install pip==18.1 \
-    && pip install papermill==0.16.0 \
+    && pip install papermill==0.16.1 \
     && pip install flake8==3.6.0 \
     && pip install jupytext==0.8.5 \
     && jupyter labextension install "@jupyterlab/celltags" \

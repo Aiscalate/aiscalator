@@ -41,8 +41,8 @@ RUN curl -fsSL "https://download.docker.com/linux/debian/gpg" | apt-key add - \
     && apt-get update -yqq \
     && apt-get install -yqq --no-install-recommends \
         docker-ce \
-    && pip install notebook==5.7.0 \
-    && pip install aiscalator==0.1.0 \
+    && pip install notebook==5.7.1 \
+    && pip install aiscalator==0.1.2 \
     && pip install jupyterlab==0.35.4 \
     && pip install jupytext==0.8.5 \
     && pip install jupyterhub==0.9.4 \
@@ -60,7 +60,7 @@ RUN curl -fsSL "https://download.docker.com/linux/debian/gpg" | apt-key add - \
         "/var/lib/apt/lists/" \
         "/tmp/" \
         "${AIRFLOW_HOME}/.jupyter" \
-        "${AIRFLOW_HOME}/work" \
+        "${AIRFLOW_HOME}/dags" \
         "/var/tmp/"
 
 # optional additional apt_packages.txt:
@@ -74,7 +74,7 @@ RUN curl -fsSL "https://download.docker.com/linux/debian/gpg" | apt-key add - \
 
 COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
 COPY jupyter_notebook_config.txt ${AIRFLOW_HOME}/.jupyter/jupyter_notebook_config.py
-
+COPY start-jupyter.sh /start-jupyter.sh
 RUN chown -R airflow: ${AIRFLOW_HOME}
 RUN usermod -a -G ${DOCKER_GROUP} airflow
 

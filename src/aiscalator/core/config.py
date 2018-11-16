@@ -80,11 +80,18 @@ def generate_user_id() -> str:
 
 def _app_config_file() -> str:
     """Return the path to the app configuration file."""
-    # TODO check env if overiden
+    if 'AISCALATOR_HOME' in os.environ:
+        home = os.environ['AISCALATOR_HOME']
+        file = os.path.join(home, "config", "aiscalator.conf")
+        if os.path.exists(file):
+            return file
     return os.path.join(os.path.expanduser("~"), '.aiscalator',
                         'config', 'aiscalator.conf')
 
 
+# TODO refactor, splitting up the Global App Config part from
+# Jupyter Config (step) and Airflow config (DAG) into 3 classes
+# with separate APIs.
 class AiscalatorConfig:
     """
     A configuration object for the Aiscalator application.
@@ -288,7 +295,7 @@ class AiscalatorConfig:
         """
         if os.path.exists(self._config_path):
             if pyhocon.ConfigFactory.parse_file(self._config_path):
-                return os.path.abspath(self._config_path)
+                return os.path.realpath(self._config_path)
         # TODO if string is url/git repo, download file locally first
         return None
 
@@ -437,9 +444,9 @@ class AiscalatorConfig:
         # TODO handle url
         root_dir = self.root_dir()
         if root_dir:
-            return os.path.abspath(os.path.join(root_dir,
-                                                self.step_field(string)))
-        return os.path.abspath(self.step_field(string))
+            path = os.path.join(root_dir, self.step_field(string))
+            return os.path.realpath(path)
+        return os.path.realpath(self.step_field(string))
 
     def step_container_name(self) -> str:
         """Return the docker container name to execute this step"""
@@ -499,13 +506,14 @@ class AiscalatorConfig:
         # TODO handle url
         root_dir = self.root_dir()
         if root_dir:
-            return os.path.abspath(os.path.join(root_dir,
-                                                self.dag_field(string)))
-        return os.path.abspath(self.dag_field(string))
+            path = os.path.join(root_dir, self.dag_field(string))
+            return os.path.realpath(path)
+        return os.path.realpath(self.dag_field(string))
 
     def dag_container_name(self) -> str:
         """Return the docker container name to execute this step"""
         return (
+            "airflow_" +
             self.dag_name().replace(".", "_")
         )
 
@@ -633,7 +641,7 @@ def _select_config(conf,
         tuple of (node_name, node) of selected
         configuration object
     """
-    result = (None, None)
+    result = None
     candidates = []
     if conf and root_node in conf:
         candidates = _find_config_tree(conf[root_node], child_node)

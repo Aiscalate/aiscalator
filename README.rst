@@ -48,9 +48,9 @@ AIscalator
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/aiscalator/
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/Aiscalate/aiscalator/v0.1.0.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/Aiscalate/aiscalator/v0.1.2.svg
     :alt: Commits since latest release
-    :target: https://github.com/Aiscalate/aiscalator/compare/v0.1.0...master
+    :target: https://github.com/Aiscalate/aiscalator/compare/v0.1.2...master
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/Aiscalate/aiscalator/master.svg
     :alt: Scrutinizer Status
@@ -126,7 +126,7 @@ Build docker images to run Jupyter environments::
 
 Build docker image to run Airflow::
 
-    aiscalator airflow setup <path-to-workspace-folder>
+    # aiscalator airflow setup <path-to-workspace-folder>
     # for example,
     aiscalator airflow setup $PWD
 
@@ -147,21 +147,21 @@ Jupyter
 
 Create a new Jupyter notebook to work on, define corresponding AIscalator step::
 
-    aiscalator jupyter new <path-to-store-new-files>
+    # aiscalator jupyter new <path-to-store-new-files>
     # For example,
     aiscalator jupyter new project
     # (CTRL + c to kill when done)
 
 Or you can edit an existing AIscalator step::
 
-    aiscalator jupyter edit <aiscalator step>
+    # aiscalator jupyter edit <aiscalator step>
     # For example, if you cloned the git repository:
     aiscalator jupyter edit resources/example/example.conf
     # (CTRL + c to kill when done)
 
 Run the step without GUI::
 
-    aiscalator jupyter run <aiscalator task>
+    # aiscalator jupyter run <aiscalator task>
     # For example, if you cloned the git repository:
     aiscalator jupyter run resources/example/example.conf
 
@@ -174,21 +174,21 @@ Start Airflow services::
 
 Create a new AIscalator DAG, define the airflow job::
 
-    aiscalator airflow new <path-to-store-new-files>
+    # aiscalator airflow new <path-to-store-new-files>
     # For example,
     aiscalator airflow new project
     # (CTRL + c to kill when done)
 
 Or you can edit an existing AIscalator DAG::
 
-    aiscalator airflow edit <aiscalator DAG>
+    # aiscalator airflow edit <aiscalator DAG>
     # For example, if you cloned the git repository:
     aiscalator airflow edit resources/example/example.conf
     # (CTRL + c to kill when done)
 
 Schedule AIscalator DAG into local airflow dags folder::
 
-    aiscalator airflow push <aiscalator DAG>
+    # aiscalator airflow push <aiscalator DAG>
     # For example, if you cloned the git repository:
     aiscalator airflow push resources/example/example.conf
 

@@ -65,7 +65,7 @@ description = 'AIscalate your Jupyter Notebook Prototypes ' \
 
 setup(
     name='aiscalator',
-    version='0.1.0',
+    version='0.1.2',
     license='Apache Software License 2.0',
     description=description,
     long_description='%s\n%s' % (
@@ -114,7 +114,7 @@ setup(
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
         'Click>=6.0',
-        'pyhocon>=0.3.47',
+        'pyhocon>=0.3.48',
         'pytz>=2018.5',
     ],
     extras_require={

@@ -73,6 +73,8 @@ main.add_command(jupyter_cli.jupyter)
 # TODO and use those shorter alias for easier commands
 # TODO - list steps/pipelines/data/etc
 
+# docker rmi $(docker images --quiet --filter "dangling=true")
+# docker kill $(docker ps -q)
 
 if __name__ == "__main__":
     sys.exit(main())  # pragma: no cover

@@ -85,8 +85,7 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	$(BROWSER) dist/docs/index.html
 
 release: dist ## package and upload a release
-	twine register dist/*
-	twine upload --skip-existing dist/*.whl dist/*.gz dist/*.zip
+	twine upload dist/*
 
 test-release: dist ## package and upload a release on test.pypi instead of real pypi
 	twine upload --repository-url https://test.pypi.org/legacy/ dist/*

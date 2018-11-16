@@ -251,19 +251,26 @@ def sha256(file: str):
 
 def wait_for_jupyter_lab(commands, logger, notebook, port, folder):
     """
+    Starts jupyter lab and wait for it to start, returning the url it's
+    running from.
 
     Parameters
     ----------
-    commands
-    logger
-    notebook
-    port
+    commands: list
+        List of commands to run to start the process
+    logger : logging.Logger
+        Logger object
+    notebook : str
+        path to the notebook
+    port :
+        port on which the jupyter lab is listening
 
     Returns
     -------
-
+    str
+        url from which it is serving the jupyter lab
     """
-    log = LogRegexAnalyzer(b'http://.*:8888/.token=([a-zA-Z0-9]+)\n')
+    log = LogRegexAnalyzer(b'.*http://.*:8888/.token=([a-zA-Z0-9]+)(\r)?\n')
     logger.info("Running...: %s", " ".join(commands))
     subprocess_run(commands, log_function=log.grep_logs, wait=False)
     for i in range(5):
@@ -276,7 +283,7 @@ def wait_for_jupyter_lab(commands, logger, notebook, port, folder):
     if log.artifact():
         # TODO handle url better (not always localhost?)
         url = ("http://localhost:" + str(port) +
-               "/lab/tree/work/" + folder + "/" +
+               "/lab/tree/" + folder + "/" +
                notebook + "?token=" +
                log.artifact())
         logger.info("%s is up and running.", url)

@@ -38,7 +38,25 @@ def jupyter():
 @jupyter.command()
 @click.version_option(version=__version__)
 def setup():
-    """Setup the docker image to run notebooks."""
+    """Setup the current docker image to run notebooks."""
+    # TODO to implement
+    logging.error("Not implemented yet")
+
+
+@jupyter.command()
+@click.version_option(version=__version__)
+def update():
+    """
+    Checks and tries to update the current docker image
+    to run notebooks to a newer version.
+
+    Initiates a docker pull of the latest images we are depending on
+    and build the next aiscalator images from there.
+    Before replacing the version tags in the Dockerfile, we make sure
+    to do a maximum in the background while still having a working
+    image in the meantime.
+
+    """
     # TODO to implement
     logging.error("Not implemented yet")
 

@@ -102,7 +102,7 @@ def _prepare_docker_image_env(conf: AiscalatorConfig):
     if conf.config_path() is not None:
         commands += [
             "--mount",
-            "type=bind,source=" + os.path.abspath(conf.config_path()) +
+            "type=bind,source=" + os.path.realpath(conf.config_path()) +
             ",target="
             "/home/jovyan/work/" + os.path.basename(conf.config_path()),
         ]
@@ -190,13 +190,13 @@ def _mount_path(conf: AiscalatorConfig, field, target_path,
             # TODO handle URL
             for i in value:
                 if make_dirs:
-                    makedirs(os.path.abspath(conf.root_dir() + i),
+                    makedirs(os.path.realpath(conf.root_dir() + i),
                              exist_ok=True)
                 if os.path.exists(conf.root_dir() + i):
                     commands += [
                         "--mount",
                         "type=bind,source=" +
-                        os.path.abspath(conf.root_dir() + i) +
+                        os.path.realpath(conf.root_dir() + i) +
                         ",target=" + target_path + value[i] +
                         (",readonly" if readonly else "")
                     ]
@@ -273,7 +273,7 @@ def jupyter_edit(conf: AiscalatorConfig):
             'jupyter', 'lab'
         ])
         return wait_for_jupyter_lab(commands, logger, notebook,
-                                    10000, "notebook")
+                                    10000, "work/notebook")
     raise Exception("Failed to build docker image")
 
 

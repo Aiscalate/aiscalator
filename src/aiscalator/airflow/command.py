@@ -33,6 +33,7 @@ from os.path import isfile
 from os.path import islink
 from os.path import join
 from os.path import realpath
+from os.path import splitext
 from tempfile import TemporaryDirectory
 
 from aiscalator.core import utils
@@ -281,11 +282,15 @@ def airflow_edit(conf: AiscalatorConfig):
         # TODO: shutdown other jupyter lab still running
         port = 10001
         notebook = basename(conf.dag_field('definition.code_path'))
+        notebook_py = splitext(notebook)[0] + ".py"
         commands = _prepare_docker_env(conf, [
-            "aiscalator/airflow:" + docker_image, 'jupyter', 'lab'
+            "aiscalator/airflow:" + docker_image, "bash",
+            "/start-jupyter.sh",
+            "/usr/local/airflow/work/" + notebook_py +
+            ":/usr/local/airflow/dags/" + notebook_py
         ], port)
         return utils.wait_for_jupyter_lab(commands, logger, notebook,
-                                          port, "dags")
+                                          port, "work")
     raise Exception("Failed to build docker image")
 
 
@@ -315,26 +320,40 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
         "docker", "run", "--name", conf.dag_container_name(), "--rm",
         # TODO improve port publishing
         "-p", str(port) + ":8888",
+        "-p", "18080:8080",
     ]
     for env in conf.user_env_file():
         if isfile(env):
             commands += ["--env-file", env]
+    commands += [
+        "--mount", "type=bind,source=/var/run/docker.sock,"
+                   "target=/var/run/docker.sock",
+    ]
     code_path = conf.dag_file_path('definition.code_path')
     commands += [
         "--mount", "type=bind,source=" + dirname(code_path) +
-        ",target=/usr/local/airflow/work/dags/",
+        ",target=/usr/local/airflow/work/",
     ]
+    if conf.config_path() is not None:
+        commands += [
+            "--mount",
+            "type=bind,source=" + abspath(conf.config_path()) +
+            ",target="
+            "/usr/local/airflow/" + basename(conf.config_path()),
+        ]
+    workspace = []
     ws_path = "airflow.setup.workspace_paths"
     if conf.app_config_has(ws_path):
         makedirs(join(conf.app_config_home(),
                       "workspace"), exist_ok=True)
         for folder in conf.app_config()[ws_path]:
             src, dst = _split_workspace_string(conf, folder)
+            workspace += [src + ":" + dst]
             commands += [
                 "--mount", "type=bind,source=" + src +
-                ",target=" + dst
+                ",target=" + src
             ]
-    commands += program
+    commands += program + workspace
     return commands
 
 
@@ -385,7 +404,7 @@ def _split_workspace_string(conf: AiscalatorConfig, workspace):
                 if not exists(link):
                     logger.info("Creating a symbolic link %s -> %s", link, src)
                     symlink(src, link)
-            dst = "/usr/local/airflow/work/" + dst
+            dst = "/usr/local/airflow/" + dst
         return src, dst
     return None, None
 
