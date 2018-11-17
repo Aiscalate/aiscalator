@@ -4,6 +4,7 @@ graft ci
 graft tests
 
 include .bumpversion.cfg
+include .bumpversion_release.cfg
 include .coveragerc
 include .cookiecutterrc
 include .editorconfig
