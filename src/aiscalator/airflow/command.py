@@ -33,7 +33,6 @@ from os.path import isfile
 from os.path import islink
 from os.path import join
 from os.path import realpath
-from os.path import splitext
 from tempfile import TemporaryDirectory
 
 from aiscalator.core import utils
@@ -118,13 +117,12 @@ def airflow_setup(conf: AiscalatorConfig,
     makedirs(dst, exist_ok=True)
     makedirs(join(conf.app_config_home(), "dags"), exist_ok=True)
     makedirs(join(conf.app_config_home(), "pgdata"), exist_ok=True)
+    makedirs(join(conf.app_config_home(), "workspace"), exist_ok=True)
     pattern = [
         r"(\s+)# - workspace #",
         "aiscalator/airflow:latest",
     ]
     workspace = []
-    makedirs(join(conf.app_config_home(),
-                  "workspace"), exist_ok=True)
     for line in conf.app_config()[ws_path]:
         host_src, container_dst = _split_workspace_string(conf, line)
         workspace += [r"\1- " + host_src + ':' + container_dst]
@@ -282,7 +280,7 @@ def airflow_edit(conf: AiscalatorConfig):
         # TODO: shutdown other jupyter lab still running
         port = 10001
         notebook = basename(conf.dag_field('definition.code_path'))
-        notebook_py = splitext(notebook)[0] + ".py"
+        notebook, notebook_py = utils.notebook_file(notebook)
         commands = _prepare_docker_env(conf, [
             "aiscalator/airflow:" + docker_image, "bash",
             "/start-jupyter.sh",
@@ -317,7 +315,8 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
         in the docker run call
     """
     commands = [
-        "docker", "run", "--name", conf.dag_container_name(), "--rm",
+        "docker", "run", "--name", conf.dag_container_name() + "_edit",
+        "--rm",
         # TODO improve port publishing
         "-p", str(port) + ":8888",
         "-p", "18080:8080",
@@ -330,8 +329,10 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
                    "target=/var/run/docker.sock",
     ]
     code_path = conf.dag_file_path('definition.code_path')
+    notebook, _ = utils.notebook_file(code_path)
+    utils.check_notebook_dir(notebook)
     commands += [
-        "--mount", "type=bind,source=" + dirname(code_path) +
+        "--mount", "type=bind,source=" + dirname(notebook) +
         ",target=/usr/local/airflow/work/",
     ]
     if conf.config_path() is not None:

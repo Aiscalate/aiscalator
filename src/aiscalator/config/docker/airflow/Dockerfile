@@ -41,7 +41,7 @@ RUN curl -fsSL "https://download.docker.com/linux/debian/gpg" | apt-key add - \
     && apt-get update -yqq \
     && apt-get install -yqq --no-install-recommends \
         docker-ce \
-    && pip install notebook==5.7.1 \
+    && pip install notebook==5.7.2 \
     && pip install aiscalator==0.1.2 \
     && pip install jupyterlab==0.35.4 \
     && pip install jupytext==0.8.5 \

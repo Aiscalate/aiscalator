@@ -98,3 +98,11 @@ dist: clean ## builds source and wheel package
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
 
+bumpversion:
+	bumpversion patch setup.py
+	git diff
+
+bumpversion-release: release ## increment version of released package
+	bumpversion --config-file .bumpversion_release.cfg patch setup.py
+	git diff
+

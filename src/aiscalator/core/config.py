@@ -58,12 +58,14 @@ def _generate_global_config() -> str:
                   .replace(tzinfo=timezone("UTC"))) +
         '" // in UTC timezone',
     ]
-    os.makedirs(os.path.dirname(dst), exist_ok=True)
+    dst_dir = os.path.dirname(dst)
+    if dst_dir:
+        os.makedirs(dst_dir, exist_ok=True)
     copy_replace(data_file("../config/template/aiscalator.conf"),
                  dst, pattern=pattern, replace_value=replace_value)
-    open(os.path.join(os.path.dirname(dst), "apt_packages.txt"), 'a').close()
-    open(os.path.join(os.path.dirname(dst), "requirements.txt"), 'a').close()
-    open(os.path.join(os.path.dirname(dst), "lab_extensions.txt"), 'a').close()
+    open(os.path.join(dst_dir, "apt_packages.txt"), 'a').close()
+    open(os.path.join(dst_dir, "requirements.txt"), 'a').close()
+    open(os.path.join(dst_dir, "lab_extensions.txt"), 'a').close()
     return dst
 
 
@@ -162,7 +164,7 @@ class AiscalatorConfig:
             # pre-create directory in advance for all loggers
             for file in filename_list:
                 file_dir = os.path.dirname(file)
-                if not os.path.isdir(file_dir):
+                if file_dir and not os.path.isdir(file_dir):
                     os.makedirs(file_dir, exist_ok=True)
             dictConfig(log_config)
         else:

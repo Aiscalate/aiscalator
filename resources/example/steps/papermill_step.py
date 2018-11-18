@@ -5,7 +5,7 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.1'
-#       jupytext_version: 0.8.4
+#       jupytext_version: 0.8.5
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -52,7 +52,7 @@ np.random.seed(1337)
 
 # %%
 # Generate some fake data by date
-dates = pd.date_range("2010-01-01", "2017-01-01")
+dates = pd.date_range("2010-01-01", "2020-01-01")
 data = pd.DataFrame(np.random.randn(len(dates)), index=dates, columns=['mydata'])
 data = data.rolling(100).mean()  # Smooth it so it looks purdy
 
@@ -93,4 +93,6 @@ ax.set(title="Start: {}\nStop: {}".format(start_date, stop_date))
 pm.display('highlight_dates_fig', fig)
 
 # %%
+
+
 
