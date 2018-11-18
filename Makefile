@@ -103,6 +103,6 @@ bumpversion:
 	git diff
 
 bumpversion-release: release ## increment version of released package
-	bumpversion --config-file .bumpversion_release.cfg patch setup.py
+	bumpversion --config-file .bumpversion_release.cfg patch .bumpversion_release.cfg
 	git diff
 
