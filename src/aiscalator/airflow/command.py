@@ -330,6 +330,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
                    "target=/var/run/docker.sock",
     ]
     code_path = conf.dag_file_path('definition.code_path')
+    utils.check_notebook(code_path)
     commands += [
         "--mount", "type=bind,source=" + dirname(code_path) +
         ",target=/usr/local/airflow/work/",

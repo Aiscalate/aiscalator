@@ -129,7 +129,7 @@ def edit(conf, notebook):
     if len(notebook) < 2:
         notebook = notebook[0] if notebook else None
         app_config = AiscalatorConfig(config=conf,
-                                      step_selection=notebook)
+                                      dag_selection=notebook)
         click.echo(command.airflow_edit(app_config))
     else:
         raise click.BadArgumentUsage("Expecting one or less notebook names")
@@ -144,7 +144,7 @@ def push(conf, notebook):
     if notebook:
         for note in notebook:
             app_config = AiscalatorConfig(config=conf,
-                                          step_selection=note)
+                                          dag_selection=note)
             click.echo(command.airflow_push(app_config))
     else:
         app_config = AiscalatorConfig(config=conf)

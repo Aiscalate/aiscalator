@@ -26,6 +26,8 @@ RUN pip install pip==18.1 \
 # optional additional lab_extensions.txt:
 # lab_extensions.txt #
 
+COPY start-papermill.sh /home/jovyan/start-papermill.sh
+
 RUN mkdir -p "/home/jovyan/work/notebook_run/" \
     && mkdir -p "/home/jovyan/work/modules/"
 ENV PYTHONPATH "${PYTHONPATH}:/home/jovyan/work/modules/"

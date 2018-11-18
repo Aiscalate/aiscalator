@@ -24,6 +24,7 @@ from os import makedirs
 from aiscalator.core.config import AiscalatorConfig
 from aiscalator.core.config import convert_to_format
 from aiscalator.core.log_regex_analyzer import LogRegexAnalyzer
+from aiscalator.core.utils import check_notebook
 from aiscalator.core.utils import copy_replace
 from aiscalator.core.utils import data_file
 from aiscalator.core.utils import subprocess_run
@@ -67,6 +68,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program):
             commands += ["--env-file", env]
     commands += _prepare_docker_image_env(conf)
     code_path = conf.step_file_path('task.code_path')
+    check_notebook(code_path)
     commands += [
         "--mount", "type=bind,source=" + os.path.dirname(code_path) +
         ",target=/home/jovyan/work/notebook/",
@@ -190,20 +192,21 @@ def _mount_path(conf: AiscalatorConfig, field, target_path,
             # TODO handle URL
             for i in value:
                 if make_dirs:
-                    makedirs(os.path.realpath(conf.root_dir() + i),
+                    makedirs(os.path.realpath(conf.root_dir() + value[i]),
                              exist_ok=True)
-                if os.path.exists(conf.root_dir() + i):
+                if os.path.exists(conf.root_dir() + value[i]):
                     commands += [
                         "--mount",
                         "type=bind,source=" +
-                        os.path.realpath(conf.root_dir() + i) +
-                        ",target=" + target_path + value[i] +
+                        os.path.realpath(conf.root_dir() + value[i]) +
+                        ",target=" + target_path + i +
                         (",readonly" if readonly else "")
                     ]
     return commands
 
 
-def jupyter_run(conf: AiscalatorConfig, prepare_only=False):
+def jupyter_run(conf: AiscalatorConfig, prepare_only=False,
+                param=None, param_raw=None):
     """
     Executes the step in browserless mode using papermill
 
@@ -229,24 +232,30 @@ def jupyter_run(conf: AiscalatorConfig, prepare_only=False):
     notebook = ("/home/jovyan/work/notebook/" +
                 os.path.basename(conf.step_file_path('task.code_path')))
     notebook_output = conf.step_notebook_output_path(notebook)
-    parameters = conf.step_extract_parameters()
     commands = _prepare_docker_env(conf, [
-        docker_image, "start.sh",
-        # TODO: check step type, if jupyter then papermill
+        docker_image, "bash", "start-papermill.sh",
         "papermill",
         notebook, notebook_output
     ])
     if prepare_only:
         commands.append("--prepare-only")
-    commands += parameters
+    parameters = conf.step_extract_parameters()
+    if parameters:
+        commands += parameters
+    if param:
+        for parameter in param:
+            commands += ["-p", parameter[0], parameter[1]]
+    if param_raw:
+        for raw_parameter in param_raw:
+            commands += ["-r", raw_parameter[0], raw_parameter[1]]
     log = LogRegexAnalyzer()
     logger.info("Running...: %s", " ".join(commands))
     subprocess_run(commands, log_function=log.grep_logs)
-    # TODO handle notebook_output execution history and latest successful run
-    return notebook_output
+    return os.path.join(conf.step_file_path('task.execution_dir_path'),
+                        os.path.basename(notebook_output))
 
 
-def jupyter_edit(conf: AiscalatorConfig):
+def jupyter_edit(conf: AiscalatorConfig, param=None, param_raw=None):
     """
     Starts a Jupyter Lab environment configured to edit the focused step
 
@@ -254,7 +263,10 @@ def jupyter_edit(conf: AiscalatorConfig):
     ----------
     conf : AiscalatorConfig
         Configuration object for the step
-
+    param : list
+        list of tuples of parameters
+    param_raw : list
+        list of tuples of raw parameters
     Returns
     -------
     string
@@ -267,7 +279,9 @@ def jupyter_edit(conf: AiscalatorConfig):
         # TODO: shutdown other jupyter lab still running
         notebook = os.path.basename(conf.step_field('task.code_path'))
         if conf.step_extract_parameters():
-            jupyter_run(conf, prepare_only=True)
+            jupyter_run(conf, prepare_only=True,
+                        param=param,
+                        param_raw=param_raw)
         commands = _prepare_docker_env(conf, [
             docker_image, "start.sh",
             'jupyter', 'lab'

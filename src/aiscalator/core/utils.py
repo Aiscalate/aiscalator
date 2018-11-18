@@ -22,6 +22,7 @@ import logging
 import os
 import re
 import webbrowser
+from pathlib import Path
 from shlex import quote
 from subprocess import PIPE  # nosec
 from subprocess import STDOUT
@@ -291,3 +292,37 @@ def wait_for_jupyter_lab(commands, logger, notebook, port, folder):
         webbrowser.open(url)
         return url
     return ""
+
+
+def check_notebook(code_path, from_format="py:percent"):
+    """
+    Checks existence of notebook file and regenerates using
+    jupytext from associated .py file if possible.
+    Otherwise, create an empty notebook file.
+
+    Parameters
+    ----------
+    code_path : str
+        path to the notebook to check
+    from_format : str
+        jupytext format of the .py input file
+
+    """
+    if not os.path.exists(code_path):
+        code_path_dir = os.path.dirname(code_path)
+        os.makedirs(code_path_dir, exist_ok=True)
+        copy_replace(data_file("../config/template/notebook.json"),
+                     code_path)
+        notebook = os.path.join(code_path_dir,
+                                os.path.basename(code_path))
+        notebook_py = os.path.join(code_path_dir,
+                                   os.path.splitext(notebook)[0] + ".py")
+        if os.path.isfile(notebook_py):
+            subprocess_run([
+                "jupytext", "--from", from_format, "--to", "ipynb",
+                notebook_py, "-o", notebook
+            ])
+            # touch notebook.py so jupytext doesn't complain when
+            # opening in the jupyter lab when the py is behind the
+            # ipynb in modification time
+            Path(notebook_py).touch()

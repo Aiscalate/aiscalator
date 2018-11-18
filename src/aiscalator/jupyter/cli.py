@@ -111,15 +111,18 @@ def prompt_edit(file):
 @jupyter.command()
 @click.argument('conf', type=click.Path(exists=True))
 @click.argument('notebook', nargs=-1)
+@click.option('-p', '--param', type=(str, str), multiple=True)
+@click.option('-r', '--param_raw', type=(str, str), multiple=True)
 @click.version_option(version=__version__)
 # TODO add parameters override from CLI
-def edit(conf, notebook):
+def edit(conf, notebook, param, param_raw):
     """Edit the notebook from an aiscalate config with JupyterLab."""
     if len(notebook) < 2:
         notebook = notebook[0] if notebook else None
         app_config = AiscalatorConfig(config=conf,
                                       step_selection=notebook)
-        click.echo(command.jupyter_edit(app_config))
+        click.echo(command.jupyter_edit(app_config,
+                                        param=param, param_raw=param_raw))
     else:
         raise click.BadArgumentUsage("Expecting one or less notebook names")
 
@@ -127,15 +130,19 @@ def edit(conf, notebook):
 @jupyter.command()
 @click.argument('conf', type=click.Path(exists=True))
 @click.argument('notebook', nargs=-1)
+@click.option('-p', '--param', type=(str, str), multiple=True)
+@click.option('-r', '--param_raw', type=(str, str), multiple=True)
 @click.version_option(version=__version__)
 # TODO add parameters override from CLI
-def run(conf, notebook):
+def run(conf, notebook, param, param_raw):
     """Run the notebook from an aiscalate config without GUI."""
     if notebook:
         for note in notebook:
             app_config = AiscalatorConfig(config=conf,
                                           step_selection=note)
-            click.echo(command.jupyter_run(app_config))
+            click.echo(command.jupyter_run(app_config,
+                                           param=param, param_raw=param_raw))
     else:
         app_config = AiscalatorConfig(config=conf)
-        click.echo(command.jupyter_run(app_config))
+        click.echo(command.jupyter_run(app_config,
+                                       param=param, param_raw=param_raw))
