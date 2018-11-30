@@ -4,7 +4,7 @@ click==7.0
 coverage==4.5.2
 flake8==3.6.0
 isort==4.3.4
-jupytext==0.8.5
+jupytext==0.8.6
 pip==18.1
 pyhocon==0.3.48
 pylint==2.2.2
