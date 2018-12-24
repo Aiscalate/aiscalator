@@ -11,6 +11,6 @@ pylint==2.2.2
 pytest==4.0.2
 pytest-runner==4.2
 pytz==2018.7
-tox==3.6.0
+tox==3.6.1
 twine==1.12.1
 wheel==0.32.3
