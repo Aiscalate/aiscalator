@@ -1,0 +1,4 @@
+flake8==3.6.0
+jupytext==0.8.6
+papermill==0.16.2
+pip==18.1

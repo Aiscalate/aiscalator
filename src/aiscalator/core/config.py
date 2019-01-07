@@ -140,14 +140,20 @@ class AiscalatorConfig:
         self._app_conf = _setup_app_config()
         self._setup_logging()
         parsed_config = _parse_config(config)
-        self._step_name, self._step = _select_config(parsed_config,
-                                                     root_node='steps',
-                                                     child_node='task',
-                                                     selection=step_selection)
-        self._dag_name, self._dag = _select_config(parsed_config,
-                                                   root_node='dags',
-                                                   child_node='definition',
-                                                   selection=dag_selection)
+        if parsed_config:
+            self._step_name, self._step = _select_config(parsed_config,
+                                                         root_node='steps',
+                                                         child_node='task',
+                                                         selection=step_selection)
+            self._dag_name, self._dag = _select_config(parsed_config,
+                                                       root_node='dags',
+                                                       child_node='definition',
+                                                       selection=dag_selection)
+        else:
+            self._step_name = None
+            self._step = None
+            self._dag_name = None
+            self._dag = None
 
     ###################################################
     # Global App Config methods                       #
