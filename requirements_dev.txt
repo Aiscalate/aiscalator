@@ -10,7 +10,7 @@ pyhocon==0.3.48
 pylint==2.2.2
 pytest==4.1.0
 pytest-runner==4.2
-pytz==2018.7
+pytz==2018.9
 tox==3.6.1
 twine==1.12.1
 wheel==0.32.3
