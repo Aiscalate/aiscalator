@@ -141,10 +141,11 @@ class AiscalatorConfig:
         self._setup_logging()
         parsed_config = _parse_config(config)
         if parsed_config:
+            step_sel = step_selection
             self._step_name, self._step = _select_config(parsed_config,
                                                          root_node='steps',
                                                          child_node='task',
-                                                         selection=step_selection)
+                                                         selection=step_sel)
             self._dag_name, self._dag = _select_config(parsed_config,
                                                        root_node='dags',
                                                        child_node='definition',
