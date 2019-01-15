@@ -26,6 +26,7 @@ from logging import StreamHandler
 from logging import getLogger
 from logging.config import dictConfig
 from platform import uname
+from tempfile import mkstemp
 from urllib.error import HTTPError
 from urllib.error import URLError
 
@@ -253,9 +254,14 @@ class AiscalatorConfig:
         self._app_conf = new_config
         return new_config
 
-    def user_env_file(self) -> list:
+    def user_env_file(self, job=None) -> list:
         """
         Find a list of env files to pass to docker containers
+
+        Parameters
+        ----------
+        job
+            Optional step or dag config
 
         Returns
         -------
@@ -263,11 +269,33 @@ class AiscalatorConfig:
             env files
 
         """
-        # TODO look if env file has been defined in the focused step
+        logger = getLogger(__name__)
+        result = []
+        # Look if any env file or variables were defined in the step/dag
+        if job:
+            (fd, env_filename) = mkstemp(prefix="aiscalator_", text=True)
+            with open(env_filename, mode="w") as env_file:
+                # concatenate all the env files and variables into one
+                for env in job:
+                    if isinstance(env, pyhocon.config_tree.ConfigTree):
+                        for k in env.keys():
+                            env_file.write(k + '=' + env.get(k) + '\n')
+                    elif os.path.isfile(os.path.join(self.root_dir(), env)):
+                            with open(os.path.join(self.root_dir(), env),
+                                      mode="r") as file:
+                                for line in file:
+                                    env_file.write(line)
+                    else:
+                        msg = ("Undefined env" + env +
+                               ": expecting a dict of environment variables" +
+                               " or path to environment configuration file.")
+                        logger.warning("Warning %s", msg)
+            result.append(env_filename)
         # TODO look in user config if env file has been redefined
-        return [
+        result.append(
             os.path.join(self.app_config_home(), "config", ".env")
-        ]
+        )
+        return result
 
     def _timestamp_now(self) -> str:
         """
