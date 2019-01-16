@@ -8,9 +8,9 @@ jupytext==0.8.6
 pip==18.1
 pyhocon==0.3.49
 pylint==2.2.2
-pytest==4.1.0
+pytest==4.1.1
 pytest-runner==4.2
 pytz==2018.9
-tox==3.6.1
+tox==3.7.0
 twine==1.12.1
 wheel==0.32.3
