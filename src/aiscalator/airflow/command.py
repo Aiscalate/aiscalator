@@ -62,7 +62,7 @@ def _docker_compose(conf: AiscalatorConfig,
     with TemporaryDirectory(prefix="aiscalator_") as tmp:
         with open(join(tmp, ".env"), mode="w") as env_file:
             # concatenate all the env files into one
-            for env in conf.user_env_file():
+            for env in conf.user_env_file(conf.dag_field("definition.env")):
                 if isfile(env):
                     with open(env, mode="r") as file:
                         for line in file:
@@ -321,7 +321,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
         "-p", str(port) + ":8888",
         "-p", "18080:8080",
     ]
-    for env in conf.user_env_file():
+    for env in conf.user_env_file(conf.dag_field("definition.env")):
         if isfile(env):
             commands += ["--env-file", env]
     commands += [

@@ -65,7 +65,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, reason):
         "-p", "10000:8888",
         "-p", "4040:4040"
     ]
-    for env in conf.user_env_file():
+    for env in conf.user_env_file(conf.step_field("task.env")):
         if os.path.isfile(env):
             commands += ["--env-file", env]
     commands += _prepare_docker_image_env(conf)
@@ -204,7 +204,7 @@ def _mount_path(conf: AiscalatorConfig, field, target_path,
                         "--mount",
                         "type=bind,source=" +
                         os.path.realpath(conf.root_dir() + value[i]) +
-                        ",target=" + target_path + i +
+                        ",target=" + os.path.join(target_path, i) +
                         (",readonly" if readonly else "")
                     ]
     return commands
