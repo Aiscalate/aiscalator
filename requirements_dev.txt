@@ -2,7 +2,7 @@ apache-airflow==1.10.2
 bumpversion==0.5.3
 click==7.0
 coverage==4.5.2
-flake8==3.7.3
+flake8==3.7.4
 isort==4.3.4
 jupytext==0.8.6
 pip==19.0.1
