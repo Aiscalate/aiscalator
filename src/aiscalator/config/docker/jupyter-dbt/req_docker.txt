@@ -1,6 +1,6 @@
 bash_kernel==0.7.1
 dbt==0.12.2
-flake8==3.7.3
+flake8==3.7.4
 jupytext==0.8.6
 papermill==0.17.1
 pip==19.0.1
