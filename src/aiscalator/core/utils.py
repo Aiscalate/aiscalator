@@ -234,7 +234,7 @@ def format_file_content(content, prefix="", suffix=""):
         for line in file:
             # TODO handle comments
             # TODO check validity of the line for extra security
-            result += prefix + quote(line) + suffix
+            result += prefix + quote(line.replace('\n', '')) + suffix
     return result
 
 

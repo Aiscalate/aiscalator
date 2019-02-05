@@ -281,10 +281,10 @@ class AiscalatorConfig:
                         for k in env.keys():
                             env_file.write(k + '=' + env.get(k) + '\n')
                     elif os.path.isfile(os.path.join(self.root_dir(), env)):
-                            with open(os.path.join(self.root_dir(), env),
-                                      mode="r") as file:
-                                for line in file:
-                                    env_file.write(line)
+                        with open(os.path.join(self.root_dir(), env),
+                                  mode="r") as file:
+                            for line in file:
+                                env_file.write(line)
                     else:
                         msg = ("Undefined env" + env +
                                ": expecting a dict of environment variables" +

@@ -17,8 +17,13 @@ RUN pip install -r req_docker.txt \
     && bash "/home/jovyan/install-jupytext.sh" \
     && rm "/home/jovyan/install-jupytext.sh"
 
+USER root
+# optional additional apt_repository.txt:
+# apt_repository.txt #
+
 # optional additional apt_packages.txt:
 # apt_packages.txt #
+USER jovyan
 
 # optional additional requirements.txt:
 # requirements.txt #

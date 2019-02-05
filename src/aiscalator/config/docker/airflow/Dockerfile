@@ -61,6 +61,9 @@ RUN curl -fsSL "https://download.docker.com/linux/debian/gpg" | apt-key add - \
         "${AIRFLOW_HOME}/dags" \
         "/var/tmp/"
 
+# optional additional apt_repository.txt:
+# apt_repository.txt #
+
 # optional additional apt_packages.txt:
 # apt_packages.txt #
 

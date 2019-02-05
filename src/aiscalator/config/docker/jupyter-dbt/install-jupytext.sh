@@ -30,8 +30,10 @@ fi
 
 grep  -q "jupytext.TextFileContentsManager" ${JUPYTER_NOTEBOOK_CONFIG}
 if [ $? -ne 0 ]; then
-    echo "Adding Jupytext support to Jupyter Notebooks"
+    echo "# Adding Jupytext support to Jupyter Notebooks" >> ${JUPYTER_NOTEBOOK_CONFIG}
     echo 'c.NotebookApp.contents_manager_class = "jupytext.TextFileContentsManager"' >> ${JUPYTER_NOTEBOOK_CONFIG}
     echo 'c.ContentsManager.default_jupytext_formats = "ipynb,auto"' >> ${JUPYTER_NOTEBOOK_CONFIG}
     echo 'c.ContentsManager.preferred_jupytext_formats_save = "auto:percent"' >> ${JUPYTER_NOTEBOOK_CONFIG}
+    echo '# Change the checkpoint dir to avoid polluting source folders' >> ${JUPYTER_NOTEBOOK_CONFIG}
+    echo 'c.FileCheckpoints.checkpoint_dir = "/home/jovyan/work/ipynb_checkpoints"' >> ${JUPYTER_NOTEBOOK_CONFIG}
 fi

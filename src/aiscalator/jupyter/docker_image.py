@@ -68,6 +68,7 @@ def _prepare_build_dir(conf, dst, input_docker_src):
     Copies all necessary files for building docker images in a tmp folder,
     substituting some specific macros accordingly to handle customized
     images such as:
+    - add-apt-repository
     - apt-install packages
     - pip install packages
     - jupyter lab extensions
@@ -92,21 +93,26 @@ def _prepare_build_dir(conf, dst, input_docker_src):
     if isdir(input_docker_dir):
         dockerfile = input_docker_dir + "/Dockerfile"
         with TemporaryDirectory(prefix="aiscalator_") as tmp:
-            settings = "jupyter.docker_image"
-            allow = (conf.app_config_has(settings + ".allow_apt_packages") and
-                     conf.app_config()[settings + ".allow_apt_packages"])
+            stg = "jupyter.docker_image"
+            allow = (conf.app_config_has(stg + ".allow_apt_repository") and
+                     conf.app_config()[stg + ".allow_apt_repository"])
+            if allow:
+                dockerfile = _include_apt_repo(conf, dockerfile,
+                                               join(tmp, "apt_repository"))
+            allow = (conf.app_config_has(stg + ".allow_apt_packages") and
+                     conf.app_config()[stg + ".allow_apt_packages"])
             if allow:
                 dockerfile = _include_apt_package(conf, dockerfile,
                                                   join(tmp, "apt_package"))
-            allow = (conf.app_config_has(settings + ".allow_requirements") and
-                     conf.app_config()[settings + ".allow_requirements"])
+            allow = (conf.app_config_has(stg + ".allow_requirements") and
+                     conf.app_config()[stg + ".allow_requirements"])
             if allow:
                 dockerfile = _include_requirements(conf, dockerfile,
                                                    join(tmp, "requirements"),
                                                    dst)
-            allow = (conf.app_config_has(settings +
+            allow = (conf.app_config_has(stg +
                                          ".allow_lab_extensions") and
-                     conf.app_config()[settings + ".allow_lab_extensions"])
+                     conf.app_config()[stg + ".allow_lab_extensions"])
             if allow:
                 dockerfile = _include_lab_extensions(conf, dockerfile,
                                                      join(tmp,
@@ -140,6 +146,39 @@ def _find_docker_src(input_docker_src, dirs):
     return utils.data_file("../config/docker/" + input_docker_src)
 
 
+def _include_apt_repo(conf: AiscalatorConfig, dockerfile, tmp):
+    """
+    Include add-apt-repository packages into the dockerfile
+
+    Parameters
+    ----------
+    conf : AiscalatorConfig
+        Configuration object for this step
+    dockerfile : str
+        path to the dockerfile to modify
+    tmp : str
+        path to the temporary dockerfile output
+
+    Returns
+    -------
+        path to the resulting dockerfile
+    """
+    if conf.has_step_field("docker_image.apt_repository_path"):
+        content = conf.step_file_path("docker_image.apt_repository_path")
+        value = utils.format_file_content(content, prefix=" ", suffix="\\\n")
+        if value:
+            value = ("RUN apt-get update \\\n" +
+                     " && apt-get install -yqq \\\n" +
+                     "      software-properties-common \\\n" +
+                     " && apt-add-repository \\\n" + value +
+                     " && apt-get update")
+            utils.copy_replace(dockerfile, tmp,
+                               pattern="# apt_repository.txt #",
+                               replace_value=value)
+            return tmp
+    return dockerfile
+
+
 def _include_apt_package(conf: AiscalatorConfig, dockerfile, tmp):
     """
     Include apt-install packages into the dockerfile
@@ -159,20 +198,20 @@ def _include_apt_package(conf: AiscalatorConfig, dockerfile, tmp):
     """
     if conf.has_step_field("docker_image.apt_package_path"):
         content = conf.step_file_path("docker_image.apt_package_path")
-        value = utils.format_file_content(content, suffix="\\\n")
+        value = utils.format_file_content(content, prefix=" ", suffix="\\\n")
         if value:
-            value = ("RUN apt-get install -yqq \\\n" + value + """
-    && apt-get purge --auto-remove -yqq $buildDeps \\
+            value = ("RUN apt-get install -yqq \\\n" + value +
+                     """    && apt-get purge --auto-remove -yqq $buildDeps \\
     && apt-get autoremove -yqq --purge \\
     && apt-get clean \\
     && rm -rf \\
-        /var/lib/apt/lists/* \\
-        /tmp/* \\
-        /var/tmp/* \\
-        /usr/share/man \\
-        /usr/share/doc \\
-        /usr/share/doc-base
-        """)
+    /var/lib/apt/lists/* \\
+    /tmp/* \\
+    /var/tmp/* \\
+    /usr/share/man \\
+    /usr/share/doc \\
+    /usr/share/doc-base
+""")
             utils.copy_replace(dockerfile, tmp,
                                pattern="# apt_packages.txt #",
                                replace_value=value)

@@ -113,6 +113,13 @@ def _prepare_docker_image_env(conf: AiscalatorConfig):
             ",target="
             "/home/jovyan/work/" + os.path.basename(conf.config_path()),
         ]
+    if conf.has_step_field("docker_image.apt_repository_path"):
+        apt_repo = conf.step_file_path('docker_image.apt_repository_path')
+        if apt_repo and os.path.isfile(apt_repo):
+            commands += [
+                "--mount", "type=bind,source=" + apt_repo +
+                ",target=/home/jovyan/work/apt_repository.txt",
+            ]
     if conf.has_step_field("docker_image.apt_package_path"):
         apt_packages = conf.step_file_path('docker_image.apt_package_path')
         if apt_packages and os.path.isfile(apt_packages):
@@ -330,6 +337,7 @@ def jupyter_new(name, path, output_format="hocon"):
         makedirs(os.path.dirname(notebook), exist_ok=True)
     copy_replace(data_file("../config/template/notebook.json"), notebook)
 
+    open(os.path.join(path, name, "apt_repository.txt"), 'a').close()
     open(os.path.join(path, name, "apt_packages.txt"), 'a').close()
     open(os.path.join(path, name, "requirements.txt"), 'a').close()
     open(os.path.join(path, name, "lab_extensions.txt"), 'a').close()

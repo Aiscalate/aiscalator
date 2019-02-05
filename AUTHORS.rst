@@ -29,11 +29,11 @@ This software uses the following open source components:
 * with the `ionelmc/cookiecutter-pylibrary`_ project template
 * PyHOCON_ under Apache-2_ license
 
-.. _Jupyter-Project: http://jupyter.org/
+.. _Jupyter-Project: https://jupyter.org/
 .. _Jupytext: https://github.com/mwouts/jupytext
 .. _Docker: https://www.docker.com/
 .. _Jupyter-Docker-Stacks: https://github.com/jupyter/docker-stacks
-.. _Airflow: https://github.com/apache/incubator-airflow
+.. _Airflow: https://github.com/apache/airflow
 .. _Docker-Airflow: https://github.com/puckel/docker-airflow
 .. _Papermill: https://github.com/nteract/papermill
 .. _PyHOCON: https://github.com/chimpler/pyhocon
