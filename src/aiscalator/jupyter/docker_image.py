@@ -200,7 +200,8 @@ def _include_apt_package(conf: AiscalatorConfig, dockerfile, tmp):
         content = conf.step_file_path("docker_image.apt_package_path")
         value = utils.format_file_content(content, prefix=" ", suffix="\\\n")
         if value:
-            value = ("RUN apt-get install -yqq \\\n" + value +
+            value = ("RUN apt-get update && apt-get install -yqq \\\n" +
+                     value +
                      """    && apt-get purge --auto-remove -yqq $buildDeps \\
     && apt-get autoremove -yqq --purge \\
     && apt-get clean \\

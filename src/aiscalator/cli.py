@@ -35,7 +35,6 @@ from aiscalator.jupyter import cli as jupyter_cli
 @click.version_option(version=__version__)
 def main():
     """ Command Line Interface to Aiscalate your data pipelines """
-    pass
 
 
 @main.command()

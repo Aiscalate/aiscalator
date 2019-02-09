@@ -273,7 +273,7 @@ class AiscalatorConfig:
         result = []
         # Look if any env file or variables were defined in the step/dag
         if job:
-            (fd, env_filename) = mkstemp(prefix="aiscalator_", text=True)
+            (_, env_filename) = mkstemp(prefix="aiscalator_", text=True)
             with open(env_filename, mode="w") as env_file:
                 # concatenate all the env files and variables into one
                 for env in job:

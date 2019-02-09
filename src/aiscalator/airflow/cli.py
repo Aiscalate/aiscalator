@@ -32,7 +32,6 @@ from aiscalator.core.config import AiscalatorConfig
 @click.version_option(version=__version__)
 def airflow():
     """Author workflow DAGs and run tasks on schedule."""
-    pass
 
 
 @airflow.command()

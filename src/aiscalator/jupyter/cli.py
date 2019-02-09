@@ -32,7 +32,6 @@ from aiscalator.jupyter import command
 @click.version_option(version=__version__)
 def jupyter():
     """Notebook environment to explore and handle data."""
-    pass
 
 
 @jupyter.command()
