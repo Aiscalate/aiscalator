@@ -1,4 +1,4 @@
 flake8==3.7.5
 jupytext==0.8.6
-papermill==0.18.0
+papermill==0.18.1
 pip==19.0.2
