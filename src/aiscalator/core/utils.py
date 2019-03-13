@@ -316,7 +316,7 @@ def check_notebook(code_path, from_format="py:percent"):
             os.makedirs(code_path_dir, exist_ok=True)
         copy_replace(data_file("../config/template/notebook.json"),
                      code_path)
-        notebook, notebook_py = notebook_file(code_path)
+        notebook, notebook_py = notebook_file(code_path, from_format)
         if os.path.isfile(notebook_py):
             subprocess_run([
                 "jupytext", "--from", from_format, "--to", "ipynb",
@@ -346,12 +346,12 @@ def check_notebook_dir(code_path, from_format="py:percent"):
     for file in os.listdir(code_path_dir):
         file = os.path.join(code_path_dir, file)
         if file != code_path:
-            if file.endswith(".py") or file.endswith(".ipynb"):
+            if file.endswith(from_format.split(":")[0]) or file.endswith(".ipynb"):
                 notebook, _ = notebook_file(file)
                 check_notebook(notebook, from_format)
 
 
-def notebook_file(code_path):
+def notebook_file(code_path, from_format="py:percent"):
     """
     Parse a path to return both the ipynb and py versions of
     the file.
@@ -360,6 +360,8 @@ def notebook_file(code_path):
     ----------
     code_path : str
         path to a file
+    from_format : str
+        jupytext format of potential .py files
 
     Returns
     -------
@@ -371,4 +373,5 @@ def notebook_file(code_path):
         base_code_path = os.path.splitext(os.path.basename(code_path))[0]
         code_path_dir = os.path.dirname(code_path)
         code_path = os.path.join(code_path_dir, base_code_path)
-    return code_path + '.ipynb', code_path + '.py'
+    code_extension = from_format.split(":")[0]
+    return code_path + '.ipynb', code_path + '.' + code_extension

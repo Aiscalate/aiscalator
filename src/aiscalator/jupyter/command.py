@@ -70,8 +70,17 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, reason):
             commands += ["--env-file", env]
     commands += _prepare_docker_image_env(conf)
     code_path = conf.step_file_path('task.code_path')
+    if conf.has_step_field('task.code_format'):
+        from_format = conf.step_field('task.code_format')
+    else:
+        from_format = "py"
+    from_format += ':'
+    if conf.has_step_field('task.jupytext_format'):
+        from_format += conf.step_field('task.jupytext_format')
+    else:
+        from_format += "percent"
     notebook, _ = notebook_file(code_path)
-    check_notebook_dir(notebook)
+    check_notebook_dir(notebook, from_format)
     commands += [
         "--mount", "type=bind,source=" + os.path.dirname(notebook) +
         ",target=/home/jovyan/work/notebook/",
