@@ -65,7 +65,7 @@ description = 'AIscalate your Jupyter Notebook Prototypes ' \
 
 setup(
     name='aiscalator',
-    version='0.1.6',
+    version='0.1.7',
     license='Apache Software License 2.0',
     description=description,
     long_description='%s\n%s' % (
