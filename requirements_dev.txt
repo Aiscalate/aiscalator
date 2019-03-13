@@ -4,11 +4,11 @@ click==7.0
 coverage==4.5.3
 flake8==3.7.7
 isort==4.3.15
-jupytext==1.0.2
+jupytext==1.0.3
 pip==19.0.3
 pyhocon==0.3.51
 pylint==2.3.1
-pytest==4.3.0
+pytest==4.3.1
 pytest-runner==4.4
 pytz==2018.9
 tox==3.7.0
