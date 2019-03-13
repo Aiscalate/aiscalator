@@ -48,9 +48,9 @@ AIscalator
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/aiscalator/
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/Aiscalate/aiscalator/v0.1.6.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/Aiscalate/aiscalator/v0.1.7.svg
     :alt: Commits since latest release
-    :target: https://github.com/Aiscalate/aiscalator/compare/v0.1.6...master
+    :target: https://github.com/Aiscalate/aiscalator/compare/v0.1.7...master
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/Aiscalate/aiscalator/master.svg
     :alt: Scrutinizer Status
