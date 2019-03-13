@@ -346,7 +346,8 @@ def check_notebook_dir(code_path, from_format="py:percent"):
     for file in os.listdir(code_path_dir):
         file = os.path.join(code_path_dir, file)
         if file != code_path:
-            if file.endswith(from_format.split(":")[0]) or file.endswith(".ipynb"):
+            if (file.endswith(from_format.split(":")[0]) or
+               file.endswith(".ipynb")):
                 notebook, _ = notebook_file(file)
                 check_notebook(notebook, from_format)
 
