@@ -1,5 +1,5 @@
 bash_kernel==0.7.1
-dbt==0.12.2
+dbt==0.13.0
 flake8==3.7.7
 jupytext==1.0.4
 papermill==0.19.0
