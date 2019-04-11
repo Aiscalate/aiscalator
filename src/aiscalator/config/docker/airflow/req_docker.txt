@@ -1,4 +1,4 @@
-aiscalator==0.1.7
+aiscalator==0.1.8
 jupyterhub==0.9.4
 jupyterlab==0.35.4
 jupytext==1.0.3
