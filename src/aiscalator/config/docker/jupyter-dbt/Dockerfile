@@ -4,7 +4,7 @@
 # SOURCE: https://github.com/aiscalate/aiscalator
 
 # https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html#jupyter-all-spark-notebook
-FROM jupyter/minimal-notebook:a95cb64dfe10
+FROM jupyter/minimal-notebook:4cdbc9cdb7d1
 LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
 
 COPY install-jupytext.sh /home/jovyan/install-jupytext.sh

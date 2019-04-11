@@ -83,6 +83,7 @@ services:
             - ../dags:/usr/local/airflow/dags
             - .env:/usr/local/airflow/.env
             - /var/run/docker.sock:/var/run/docker.sock
+            - ../workspace:/usr/local/airflow/workspace
             # Custom workspace folders to mount, add below
             # - workspace #
             # Uncomment to include custom plugins

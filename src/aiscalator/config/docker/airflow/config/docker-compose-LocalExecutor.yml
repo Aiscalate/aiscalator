@@ -6,6 +6,10 @@ services:
             - POSTGRES_USER=airflow
             - POSTGRES_PASSWORD=airflow
             - POSTGRES_DB=airflow
+        # Uncomment these lines to persist data on the local filesystem.
+            - PGDATA=/var/lib/postgresql/data/pgdata
+        volumes:
+            - ../pgdata:/var/lib/postgresql/data/pgdata
 
     webserver:
         image: aiscalator/airflow:latest
@@ -18,11 +22,15 @@ services:
         volumes:
             - ../dags:/usr/local/airflow/dags
             - ./airflow.cfg:/usr/local/airflow/airflow.cfg
+            - .env:/usr/local/airflow/.env
             - /var/run/docker.sock:/var/run/docker.sock
-            # Custom workspace to mount
-            #workspace#
+            - ../workspace:/usr/local/airflow/workspace
+            # Custom workspace folders to mount, add below
+            # - workspace #
             # Uncomment to include custom plugins
             # - ../plugins:/usr/local/airflow/plugins
+        env_file:
+            - .env
         ports:
             - "8080:8080"
         command: webserver

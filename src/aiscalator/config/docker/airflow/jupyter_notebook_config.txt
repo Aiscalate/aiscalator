@@ -42,3 +42,4 @@ if 'GEN_CERT' in os.environ:
 c.NotebookApp.contents_manager_class = "jupytext.TextFileContentsManager"
 c.ContentsManager.default_jupytext_formats = "ipynb,auto"
 c.ContentsManager.preferred_jupytext_formats_save = "auto:percent"
+c.FileCheckpoints.checkpoint_dir = "/usr/local/airflow/work/ipynb_checkpoints"
