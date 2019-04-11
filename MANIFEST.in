@@ -19,7 +19,7 @@ include FEATURES.rst
 
 include tox.ini .travis.yml appveyor.yml aiscalator-complete.sh
 
-global-exclude *.py[cod] __pycache__ *.so *.dylib
+global-exclude *.py[cod] __pycache__ *.so *.dylib *.DS_Store
 global-exclude  .codacy.* .github* _static* local* resources* docs/_build*
 global-exclude Makefile requirements_dev.txt
 

@@ -21,7 +21,7 @@ AIscalator
     :target: https://aiscalator.readthedocs.io/en/latest/?badge=latest
     :alt: Documentation Status
 
-.. |travis| image:: https://travis-ci.org/Aiscalate/aiscalator.svg?branch=master
+.. |travis| image:: https://api.travis-ci.org/Aiscalate/aiscalator.svg?branch=master
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/Aiscalate/aiscalator
 
@@ -33,7 +33,7 @@ AIscalator
     :alt: Coverage Status
     :target: https://coveralls.io/github/Aiscalate/aiscalator
 
-.. |codecov| image:: https://codecov.io/github/Aiscalate/aiscalator/coverage.svg?branch=master
+.. |codecov| image:: https://codecov.io/gh/Aiscalate/aiscalator/branch/master/graphs/badge.svg?branch=master
     :alt: Coverage Status
     :target: https://codecov.io/github/Aiscalate/aiscalator
 

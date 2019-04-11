@@ -13,6 +13,14 @@ Subpackages
 Submodules
 ----------
 
+aiscalator.api module
+---------------------
+
+.. automodule:: aiscalator.api
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 aiscalator.cli module
 ---------------------
 

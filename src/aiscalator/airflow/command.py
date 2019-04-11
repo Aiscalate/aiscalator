@@ -125,7 +125,8 @@ def airflow_setup(conf: AiscalatorConfig,
     workspace = []
     for line in conf.app_config()[ws_path]:
         host_src, container_dst = _split_workspace_string(conf, line)
-        # bind the same path from host in the container (after creating a symbolic link at container_dst path)
+        # bind the same path from host in the container (after creating a
+        # symbolic link at container_dst path)
         workspace += [r"\1- " + host_src + ':' + host_src]
     workspace += [r"\1# - workspace #"]
     value = [
@@ -350,7 +351,8 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
                       "workspace"), exist_ok=True)
         for folder in conf.app_config()[ws_path]:
             src, dst = _split_workspace_string(conf, folder)
-            # bind the same path from host in the container (after creating a symbolic link at dst path)
+            # bind the same path from host in the container (after creating
+            # a symbolic link at dst path)
             workspace += [src + ":" + src]
             commands += [
                 "--mount", "type=bind,source=" + src +
@@ -396,8 +398,9 @@ def _split_workspace_string(conf: AiscalatorConfig, workspace):
             src = abspath(workspace)
             if not src.startswith('/'):
                 src = abspath(join(root_dir, src))
-            # in the workspace special folder, we'll create the same named folder (basename) that is actually a link
-            # back to the one we want to include in our workspace.
+            # in the workspace special folder, we'll create the same named
+            # folder (basename) that is actually a link back to the one
+            # we want to include in our workspace.
             dst = join("workspace", basename(workspace.strip('/')))
             link = join(root_dir, dst)
             if realpath(src) != realpath(link):
