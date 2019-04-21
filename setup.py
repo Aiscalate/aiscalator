@@ -114,7 +114,7 @@ setup(
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
         'Click>=6.0',
-        'jupytext>=0.8.6',
+        'jupytext>=1.1.0',
         'pyhocon>=0.3.48',
         'pytz>=2018.5',
     ],

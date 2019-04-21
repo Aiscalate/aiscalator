@@ -310,22 +310,23 @@ def check_notebook(code_path, from_format="py:percent"):
         jupytext format of the .py input file
 
     """
+    notebook, notebook_py = notebook_file(code_path, from_format)
+    # TODO: check if last modified date of notebook_py is behind notebook then refresh it
     if not os.path.exists(code_path):
         code_path_dir = os.path.dirname(code_path)
         if code_path_dir:
             os.makedirs(code_path_dir, exist_ok=True)
         copy_replace(data_file("../config/template/notebook.json"),
                      code_path)
-        notebook, notebook_py = notebook_file(code_path, from_format)
-        if os.path.isfile(notebook_py):
-            subprocess_run([
-                "jupytext", "--from", from_format, "--to", "ipynb",
-                notebook_py, "-o", notebook
-            ])
-            # touch notebook.py so jupytext doesn't complain when
-            # opening in the jupyter lab when the py is behind the
-            # ipynb in modification time
-            Path(notebook_py).touch()
+    if os.path.isfile(notebook_py):
+        subprocess_run([
+            "jupytext", "--from", from_format, "--to", "ipynb",
+            notebook_py, "-o", notebook, "--sync"
+        ])
+        # touch notebook.py so jupytext doesn't complain when
+        # opening in the jupyter lab when the py is behind the
+        # ipynb in modification time
+        Path(notebook_py).touch()
 
 
 def check_notebook_dir(code_path, from_format="py:percent"):

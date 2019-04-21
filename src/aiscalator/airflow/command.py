@@ -347,8 +347,9 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
     workspace = []
     ws_path = "airflow.setup.workspace_paths"
     if conf.app_config_has(ws_path):
-        makedirs(join(conf.app_config_home(),
-                      "workspace"), exist_ok=True)
+        ws_home = join(conf.app_config_home(),
+                      "workspace")
+        makedirs(ws_home, exist_ok=True)
         for folder in conf.app_config()[ws_path]:
             src, dst = _split_workspace_string(conf, folder)
             # bind the same path from host in the container (after creating
@@ -358,6 +359,10 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
                 "--mount", "type=bind,source=" + src +
                 ",target=" + src
             ]
+        commands += [
+            "--mount", "type=bind,source=" + ws_home +
+            ",target=/usr/local/airflow/workspace/"
+        ]
     commands += program + workspace
     return commands
 

@@ -8,7 +8,11 @@
    "source": []
   }
  ],
- "metadata": {},
+ "metadata": {
+    "jupytext": {
+        "formats": "ipynb,py:percent"
+    }
+ },
  "nbformat": 4,
  "nbformat_minor": 2
 }
