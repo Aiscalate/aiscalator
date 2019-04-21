@@ -311,7 +311,8 @@ def check_notebook(code_path, from_format="py:percent"):
 
     """
     notebook, notebook_py = notebook_file(code_path, from_format)
-    # TODO: check if last modified date of notebook_py is behind notebook then refresh it
+    # TODO: check if last modified date of notebook_py is behind notebook
+    # then refresh it
     if not os.path.exists(code_path):
         code_path_dir = os.path.dirname(code_path)
         if code_path_dir:

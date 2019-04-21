@@ -348,7 +348,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
     ws_path = "airflow.setup.workspace_paths"
     if conf.app_config_has(ws_path):
         ws_home = join(conf.app_config_home(),
-                      "workspace")
+                       "workspace")
         makedirs(ws_home, exist_ok=True)
         for folder in conf.app_config()[ws_path]:
             src, dst = _split_workspace_string(conf, folder)
