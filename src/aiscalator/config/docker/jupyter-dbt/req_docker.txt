@@ -3,4 +3,4 @@ dbt==0.13.0
 flake8==3.7.7
 jupytext==1.1.1
 papermill==0.19.1
-pip==19.0.3
+pip==19.1
