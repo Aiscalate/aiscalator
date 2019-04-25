@@ -296,7 +296,7 @@ def wait_for_jupyter_lab(commands, logger, notebook, port, folder):
     return ""
 
 
-def check_notebook(code_path, from_format="py:percent"):
+def check_notebook(logger, code_path, from_format="py:percent"):
     """
     Checks existence of notebook file and regenerates using
     jupytext from associated .py file if possible.
@@ -313,24 +313,32 @@ def check_notebook(code_path, from_format="py:percent"):
     notebook, notebook_py = notebook_file(code_path, from_format)
     # TODO: check if last modified date of notebook_py is behind notebook
     # then refresh it
+    commands = [
+        "jupytext", "--from", from_format, "--to", "notebook",
+        notebook_py, "-o", notebook,
+        "--set-formats", ".ipynb," + from_format
+    ]
     if not os.path.exists(code_path):
         code_path_dir = os.path.dirname(code_path)
         if code_path_dir:
             os.makedirs(code_path_dir, exist_ok=True)
         copy_replace(data_file("../config/template/notebook.json"),
-                     code_path)
+                     code_path,
+                     pattern="__format__", replace_value=from_format)
+
+        logger.info("Running...: %s", " ".join(commands))
+        subprocess_run(commands)
     if os.path.isfile(notebook_py):
-        subprocess_run([
-            "jupytext", "--from", from_format, "--to", "ipynb",
-            notebook_py, "-o", notebook, "--sync"
-        ])
+        commands += ["--sync"]
+        logger.info("Running...: %s", " ".join(commands))
+        subprocess_run(commands)
         # touch notebook.py so jupytext doesn't complain when
         # opening in the jupyter lab when the py is behind the
         # ipynb in modification time
         Path(notebook_py).touch()
 
 
-def check_notebook_dir(code_path, from_format="py:percent"):
+def check_notebook_dir(logger, code_path, from_format="py:percent"):
     """
     Check a folder and generate all notebook files that might
     be required in that folder.
@@ -343,15 +351,15 @@ def check_notebook_dir(code_path, from_format="py:percent"):
         jupytext format of potential .py files
 
     """
-    check_notebook(code_path, from_format)
+    check_notebook(logger, code_path, from_format)
     code_path_dir = os.path.dirname(code_path)
     for file in os.listdir(code_path_dir):
         file = os.path.join(code_path_dir, file)
-        if file != code_path:
+        notebook, notebook_py = notebook_file(file)
+        if notebook != code_path and notebook_py != code_path:
             if (file.endswith(from_format.split(":")[0]) or
                file.endswith(".ipynb")):
-                notebook, _ = notebook_file(file)
-                check_notebook(notebook, from_format)
+                check_notebook(logger, notebook, from_format)
 
 
 def notebook_file(code_path, from_format="py:percent"):

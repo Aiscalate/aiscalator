@@ -10,7 +10,7 @@
  ],
  "metadata": {
     "jupytext": {
-        "formats": "ipynb,py:percent"
+        "formats": "ipynb,__format__"
     }
  },
  "nbformat": 4,

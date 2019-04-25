@@ -316,6 +316,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
         The full Array of Strings representing the commands to execute
         in the docker run call
     """
+    logger = logging.getLogger(__name__)
     commands = [
         "docker", "run", "--name", conf.dag_container_name() + "_edit",
         "--rm",
@@ -332,7 +333,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, port):
     ]
     code_path = conf.dag_file_path('definition.code_path')
     notebook, _ = utils.notebook_file(code_path)
-    utils.check_notebook_dir(notebook)
+    utils.check_notebook_dir(logger, notebook)
     commands += [
         "--mount", "type=bind,source=" + dirname(notebook) +
         ",target=/usr/local/airflow/work/",

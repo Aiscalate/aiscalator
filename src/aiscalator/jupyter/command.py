@@ -57,6 +57,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, reason):
         The full Array of Strings representing the commands to execute
         in the docker run call
     """
+    logger = logging.getLogger(__name__)
     # TODO: refactor using https://github.com/docker/docker-py ?
     commands = [
         "docker", "run", "--name", conf.step_container_name() + "_" + reason,
@@ -80,7 +81,7 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, reason):
     else:
         from_format += "percent"
     notebook, _ = notebook_file(code_path)
-    check_notebook_dir(notebook, from_format)
+    check_notebook_dir(logger, notebook, from_format)
     commands += [
         "--mount", "type=bind,source=" + os.path.dirname(notebook) +
         ",target=/home/jovyan/work/notebook/",
