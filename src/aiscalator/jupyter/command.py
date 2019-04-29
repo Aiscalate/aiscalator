@@ -151,6 +151,9 @@ def _prepare_docker_image_env(conf: AiscalatorConfig):
                 "--mount", "type=bind,source=" + lab_extensions +
                 ",target=/home/jovyan/work/lab_extensions.txt",
             ]
+    # allow to pass a list of extra options like ["--network", "bridge"]
+    if conf.has_step_field("docker_image.docker_extra_options"):
+        commands += conf.step_field("docker_image.docker_extra_options")
     return commands
 
 
