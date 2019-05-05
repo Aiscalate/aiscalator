@@ -58,13 +58,9 @@ def _prepare_docker_env(conf: AiscalatorConfig, program, reason):
         in the docker run call
     """
     logger = logging.getLogger(__name__)
-    # TODO: refactor using https://github.com/docker/docker-py ?
     commands = [
         "docker", "run", "--name", conf.step_container_name() + "_" + reason,
-        "--rm",
-        # TODO improve port publishing
-        "-p", "10000:8888",
-        "-p", "4040:4040"
+        "--rm"
     ]
     for env in conf.user_env_file(conf.step_field("task.env")):
         if os.path.isfile(env):
@@ -310,6 +306,9 @@ def jupyter_edit(conf: AiscalatorConfig, param=None, param_raw=None):
                         param=param,
                         param_raw=param_raw)
         commands = _prepare_docker_env(conf, [
+            # TODO: improve port publishing
+            "-p", "10000:8888",
+            "-p", "4040:4040",
             docker_image, "start.sh",
             'jupyter', 'lab'
         ], "edit")
