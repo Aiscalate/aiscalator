@@ -8,7 +8,7 @@ jupytext==1.1.1
 pip==19.1.1
 pyhocon==0.3.51
 pylint==2.3.1
-pytest==4.4.1
+pytest==4.4.2
 pytest-runner==4.4
 pytz==2019.1
 tox==3.9.0
