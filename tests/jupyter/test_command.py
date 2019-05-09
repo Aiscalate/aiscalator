@@ -23,6 +23,8 @@ from aiscalator.jupyter import command
 
 def test_prepare_docker_image_env_extra_options():
     """Test the _prepare_docker_image_env."""
-    options_list = command._prepare_docker_image_env(AiscalatorConfig("tests/jupyter/sample_pyhocon.conf"))
+    options_list = command._prepare_docker_image_env(
+        AiscalatorConfig("tests/jupyter/sample_pyhocon.conf")
+    )
     'bridge' == options_list[-1]
     '--network' == options_list[-2]
