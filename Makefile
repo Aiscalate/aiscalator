@@ -51,7 +51,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 	rm -fr .pytest_cache
 
-check: ## check
+check: dist ## check
 	tox -e check
 
 lint: ## check style with flake8
