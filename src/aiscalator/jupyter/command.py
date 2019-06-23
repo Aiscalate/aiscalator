@@ -17,6 +17,7 @@
 """
 Implementations of commands for Jupyter
 """
+import datetime
 import logging
 import os.path
 from os import makedirs
@@ -258,7 +259,9 @@ def jupyter_run(conf: AiscalatorConfig, prepare_only=False,
         docker_image, "bash", "start-papermill.sh",
         "papermill",
         notebook, notebook_output
-    ], "run")
+    ], "run_" + conf.step_name() + "_"
+       # add timestamp to name to handle multiple concurrent runs
+       + datetime.datetime.now().strftime('%Y%m%d_%H%M%S'))
     if prepare_only:
         commands.append("--prepare-only")
     parameters = conf.step_extract_parameters()
@@ -301,7 +304,7 @@ def jupyter_edit(conf: AiscalatorConfig, param=None, param_raw=None):
         # TODO: shutdown other jupyter lab still running
         notebook, _ = notebook_file(conf.step_field('task.code_path'))
         notebook = os.path.basename(notebook)
-        if conf.step_extract_parameters():
+        if conf.step_extract_parameters() or param or param_raw:
             jupyter_run(conf, prepare_only=True,
                         param=param,
                         param_raw=param_raw)
