@@ -329,9 +329,12 @@ def check_notebook(logger, code_path, from_format="py:percent"):
         logger.info("Running...: %s", " ".join(commands))
         subprocess_run(commands)
     if os.path.isfile(notebook_py):
-        commands += ["--sync"]
-        logger.info("Running...: %s", " ".join(commands))
-        subprocess_run(commands)
+        logger.info("Running...: %s", " ".join(commands + ["--sync"]))
+        returncode = subprocess_run(commands + ["--sync"])
+        if returncode:
+            logger.warning("Failed to synchronize jupytext notebook, regenerating it")
+            logger.info("Running...: %s", " ".join(commands))
+            subprocess_run(commands)
         # touch notebook.py so jupytext doesn't complain when
         # opening in the jupyter lab when the py is behind the
         # ipynb in modification time

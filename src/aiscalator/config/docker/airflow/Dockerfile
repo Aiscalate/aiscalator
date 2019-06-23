@@ -3,7 +3,7 @@
 # BUILD: docker build --build-arg DOCKER_GID=`getent group docker | cut -d ':' -f 3` --rm -t aiscalator/airflow .
 # SOURCE: https://github.com/aiscalate/aiscalator
 
-FROM puckel/docker-airflow:1.10.2
+FROM puckel/docker-airflow:1.10.3
 LABEL maintainer="Christophe Duong <chris@aiscalate.com>"
 
 ARG AIRFLOW_HOME=/usr/local/airflow
