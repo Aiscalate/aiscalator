@@ -20,6 +20,7 @@ Implementations of commands for Jupyter
 import datetime
 import logging
 import os.path
+import sys
 from os import makedirs
 
 from aiscalator.core.config import AiscalatorConfig
@@ -275,7 +276,11 @@ def jupyter_run(conf: AiscalatorConfig, prepare_only=False,
             commands += ["-r", raw_parameter[0], raw_parameter[1]]
     log = LogRegexAnalyzer()
     logger.info("Running...: %s", " ".join(commands))
-    subprocess_run(commands, log_function=log.grep_logs)
+    returncode = subprocess_run(commands, log_function=log.grep_logs)
+    if returncode:
+        logger.error("Run was not successful, returned status code is: "
+                     + str(returncode))
+        sys.exit(returncode)
     return os.path.join(conf.step_file_path('task.execution_dir_path'),
                         os.path.basename(notebook_output))
 

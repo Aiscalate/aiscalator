@@ -332,7 +332,8 @@ def check_notebook(logger, code_path, from_format="py:percent"):
         logger.info("Running...: %s", " ".join(commands + ["--sync"]))
         returncode = subprocess_run(commands + ["--sync"])
         if returncode:
-            logger.warning("Failed to synchronize jupytext notebook, regenerating it")
+            logger.warning("Failed to synchronize jupytext notebook,"
+                           + " regenerating it")
             logger.info("Running...: %s", " ".join(commands))
             subprocess_run(commands)
         # touch notebook.py so jupytext doesn't complain when
