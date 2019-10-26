@@ -9,7 +9,7 @@ pip==19.3.1
 pyhocon==0.3.53
 pylint==2.4.3
 pytest==5.2.2
-pytest-runner==5.1
+pytest-runner==5.2
 pytz==2019.3
 tox==3.14.0
 twine==2.0.0
