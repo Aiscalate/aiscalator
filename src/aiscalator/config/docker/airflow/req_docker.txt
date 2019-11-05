@@ -2,4 +2,4 @@ aiscalator==0.1.14
 jupyterhub==1.0.0
 jupyterlab==1.2.1
 jupytext==1.2.4
-notebook==6.0.1
+notebook==6.0.2
