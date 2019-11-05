@@ -37,7 +37,7 @@ This software uses the following open source components:
 .. _Docker-Airflow: https://github.com/puckel/docker-airflow
 .. _Papermill: https://github.com/nteract/papermill
 .. _PyHOCON: https://github.com/chimpler/pyhocon
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
+.. _Cookiecutter: https://github.com/cookiecutter/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
 .. _`ionelmc/cookiecutter-pylibrary`: https://github.com/ionelmc/cookiecutter-pylibrary
 

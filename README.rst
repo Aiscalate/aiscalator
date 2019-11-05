@@ -48,11 +48,11 @@ AIscalator
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/aiscalator/
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/Aiscalate/aiscalator/v0.1.14.svg
+.. |commits-since| image:: https://img.shields.io/github/commits-since/Aiscalate/aiscalator/v0.1.15.svg
     :alt: Commits since latest release
-    :target: https://github.com/Aiscalate/aiscalator/compare/v0.1.14...master
+    :target: https://github.com/Aiscalate/aiscalator/compare/v0.1.15...master
 
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/g/Aiscalate/aiscalator/master.svg
+.. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/Aiscalate/aiscalator/master.svg
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/Aiscalate/aiscalator/
 
@@ -61,7 +61,7 @@ AIscalator
 
 * Free software: Apache Software License 2.0
 * Website: http://www.aiscalate.com
-* Documentation: https://aiscalator.readthedocs.io.
+* Documentation: https://aiscalator.readthedocs.io/en/latest/
 * Bugs: https://github.com/aiscalate/aiscalator/issues
 
 Key Features

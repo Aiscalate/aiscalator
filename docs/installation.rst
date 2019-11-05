@@ -39,7 +39,7 @@ Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/aiscalate/aiscalator/tarball/master
+    $ curl  -OL https://codeload.github.com/Aiscalate/aiscalator/legacy.tar.gz/master
 
 Once you have a copy of the source, you can install it with:
 
