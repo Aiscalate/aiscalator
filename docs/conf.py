@@ -33,7 +33,7 @@ project = 'AIscalator'
 year = '2018'
 author = 'Christophe Duong'
 copyright = '{0}, {1}'.format(year, author)
-version = release = '0.1.16'
+version = release = '0.1.17'
 
 pygments_style = 'trac'
 # Add any paths that contain templates here, relative to this directory.
