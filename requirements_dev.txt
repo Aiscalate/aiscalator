@@ -13,4 +13,4 @@ pytest-runner==5.2
 pytz==2019.3
 tox==3.14.3
 twine==3.1.1
-wheel==0.34.0
+wheel==0.34.1
