@@ -3,5 +3,5 @@ dbt==0.16.0
 flake8==3.7.9
 jsonschema==3.2.0
 jupytext==1.4.1
-papermill==2.0.0
+papermill==2.1.0
 pip==20.0.2
