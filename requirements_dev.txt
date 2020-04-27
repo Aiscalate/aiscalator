@@ -1,6 +1,6 @@
 apache-airflow==1.10.10
 bumpversion==0.5.3
-click==7.1.1
+click==7.1.2
 coverage==5.1
 flake8==3.7.9
 isort==4.3.21
