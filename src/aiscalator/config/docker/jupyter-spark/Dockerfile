@@ -12,7 +12,6 @@ COPY install-jupytext.sh /home/jovyan/install-jupytext.sh
 COPY req_docker.txt req_docker.txt
 
 RUN pip install -r req_docker.txt \
-    && jupyter labextension install "@jupyterlab/celltags" \
     && jupyter labextension install jupyterlab-jupytext \
     && bash "/home/jovyan/install-jupytext.sh" \
     && rm "/home/jovyan/install-jupytext.sh"
