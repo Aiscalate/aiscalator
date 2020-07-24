@@ -1,11 +1,14 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: language_info
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.1'
-#       jupytext_version: 0.8.5
+#       format_version: '1.3'
+#       jupytext_version: 1.5.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -30,14 +33,14 @@ source_id = 'sensor1'
 nb_days = 7
 
 # %%
-import statsmodels.api as sm
+from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
-from datetime import datetime, timedelta 
 import os
 import pandas as pd
-
 from pylab import rcParams
-import papermill as pm
+import scrapbook as sb
+import statsmodels.api as sm
+
 
 # %%
 data_dir = "../data/input/step1" 

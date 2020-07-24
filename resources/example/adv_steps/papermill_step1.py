@@ -1,11 +1,14 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: language_info
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.1'
-#       jupytext_version: 0.8.5
+#       format_version: '1.3'
+#       jupytext_version: 1.5.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -29,11 +32,11 @@ run_date = "2018-04-28"
 source_id = 'sensor1'
 
 # %%
-import pandas as pd
-import numpy as np
-import papermill as pm
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import numpy as np
+import pandas as pd
+import scrapbook as sb
 from datetime import datetime, timedelta
 import time
 import os
@@ -62,7 +65,7 @@ ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M:%S'))
 plt.gcf().autofmt_xdate()
 ax.plot(data.index, data['mydata'], c='k', alpha=.5)
 ax.set(title="Activity for the day of {}".format(run_date))
-pm.display('activity_day_fig', fig)
+sb.glue('activity_day_fig', fig, display=True)
 
 # %%
 month_partition = run_datetime.strftime("%Y-%m")

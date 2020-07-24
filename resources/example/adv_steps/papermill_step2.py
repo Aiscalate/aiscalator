@@ -1,11 +1,14 @@
 # ---
 # jupyter:
 #   jupytext:
+#     cell_metadata_json: true
+#     formats: ipynb,py:percent
+#     notebook_metadata_filter: language_info
 #     text_representation:
 #       extension: .py
 #       format_name: percent
-#       format_version: '1.1'
-#       jupytext_version: 0.8.5
+#       format_version: '1.3'
+#       jupytext_version: 1.5.2
 #   kernelspec:
 #     display_name: Python 3
 #     language: python
@@ -19,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.6.6
+#     version: 3.8.4
 # ---
 
 # %% {"tags": ["parameters"]}
@@ -30,15 +33,15 @@ source_id = 'sensor1'
 nb_days = 32
 
 # %%
-import numpy as np
-import pandas as pd
-import papermill as pm
-import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
-import os
-import statsmodels.api as sm
-from pylab import rcParams
+import matplotlib.pyplot as plt
+import numpy as np
 import itertools
+import os
+import pandas as pd
+from pylab import rcParams
+import scrapbook as sb
+import statsmodels.api as sm
 
 # turn off interactive plotting to avoid double plotting
 plt.ioff()
@@ -59,7 +62,12 @@ for i in range(nb_days):
             data = pd.concat([data, new])
         else:
             data = new
+    else:
+        print("Failed to load " + file)
 
+
+# %%
+print(data)
 
 # %%
 data['date'] = data['date'].apply(lambda x : datetime.strptime(x, "%Y-%m-%d %H:%M:%S"))
@@ -149,7 +157,7 @@ ax.set_xlabel('Date')
 ax.set_ylabel('mydata')
 ax.set(title='Results of ARIMA{}x{}12 - AIC:{} on {}'.format(best[1], best[2], round(best[0]), run_date))
 fig.legend()
-pm.display('arima_results_fig', fig)
+sb.glue('arima_results_fig', fig, display=True)
 
 # %%
 pred.save("../data/output/step2/prediction_model_" + run_date + "-" + source_id)

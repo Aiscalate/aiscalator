@@ -22,7 +22,7 @@
 #     name: python
 #     nbconvert_exporter: python
 #     pygments_lexer: ipython3
-#     version: 3.6.6
+#     version: 3.8.4
 # ---
 
 # %% [markdown]
@@ -46,10 +46,11 @@ stop_date = "2016-01-01"
 # We'll run `plt.ioff()` so that we don't get double plots in the notebook
 
 # %%
-import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
-import papermill as pm
+import numpy as np
+import pandas as pd
+import scrapbook as sb
+
 plt.ioff()
 np.random.seed(1337)
 
@@ -77,7 +78,7 @@ data_highlight = data.loc[start_date: stop_date]
 
 # %%
 num_records = len(data_highlight)
-pm.record('num_records', num_records)
+sb.glue('num_records', num_records, display=True)
 if num_records == 0:
     raise ValueError("I have no data to highlight! Check that your dates are correct!")
 
@@ -93,7 +94,7 @@ fig, ax = plt.subplots()
 ax.plot(data.index, data['mydata'], c='k', alpha=.5)
 ax.plot(data_highlight.index, data_highlight['mydata'], c='r', lw=3)
 ax.set(title="Start: {}\nStop: {}".format(start_date, stop_date))
-pm.display('highlight_dates_fig', fig)
+sb.glue('highlight_dates_fig', fig, display=True)
 
 # %%
 
