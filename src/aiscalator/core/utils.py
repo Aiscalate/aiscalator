@@ -126,7 +126,7 @@ def log_info(pipe):
     """ Default logging function """
     logger = logging.getLogger(__name__)
     for line in iter(pipe.readline, b''):
-        logger.debug(line)
+        logger.debug(line.decode("utf-8"))
     return True
 
 

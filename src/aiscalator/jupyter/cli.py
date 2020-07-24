@@ -20,6 +20,10 @@ CLI module for Jupyter related commands.
 import logging
 import os
 import sys
+from subprocess import PIPE  # nosec
+from subprocess import Popen
+from subprocess import TimeoutExpired
+from threading import Thread
 
 import click
 
@@ -38,6 +42,7 @@ def jupyter():
 @click.version_option(version=__version__)
 def setup():
     """Setup the current docker image to run notebooks."""
+    update_aiscalator()
     # TODO to implement
     logging.error("Not implemented yet")
 
@@ -56,6 +61,7 @@ def update():
     image in the meantime.
 
     """
+    update_aiscalator()
     # TODO to implement
     logging.error("Not implemented yet")
 
@@ -73,6 +79,7 @@ def update():
 @click.version_option(version=__version__)
 def new(name, output_format, path):
     """Create a new notebook associated with a new aiscalate step config."""
+    update_aiscalator()
     file_conf = os.path.join(path, name, name) + '.conf'
     file_json = os.path.join(path, name, name) + '.json'
     if os.path.exists(file_conf):
@@ -116,6 +123,7 @@ def prompt_edit(file):
 # TODO add parameters override from CLI
 def edit(conf, notebook, param, param_raw):
     """Edit the notebook from an aiscalate config with JupyterLab."""
+    update_aiscalator()
     if len(notebook) < 2:
         notebook = notebook[0] if notebook else None
         app_config = AiscalatorConfig(config=conf,
@@ -135,6 +143,7 @@ def edit(conf, notebook, param, param_raw):
 # TODO add parameters override from CLI
 def run(conf, notebook, param, param_raw):
     """Run the notebook from an aiscalate config without GUI."""
+    update_aiscalator()
     if notebook:
         for note in notebook:
             app_config = AiscalatorConfig(config=conf,
@@ -145,3 +154,50 @@ def run(conf, notebook, param, param_raw):
         app_config = AiscalatorConfig(config=conf)
         click.echo(command.jupyter_run(app_config,
                                        param=param, param_raw=param_raw))
+
+
+def update_aiscalator():
+    """
+    Create and run Thread to execute auto update in the background
+    """
+    worker = Thread(name='autoUpdate', target=run_auto_update)
+    worker.start()
+
+
+def run_auto_update():
+    """
+    Checks and tries to update Aiscalator itself from Pypi if necessary
+    """
+    version = pip_list = grep = sed = pip_install = None
+    try:
+        cmd = ["pip", "list", "--outdated"]
+        pip_list = Popen(cmd, stdout=PIPE)
+        pip_list_out, _ = pip_list.communicate(timeout=60)
+
+        cmd = ["grep", "aiscalator"]
+        grep = Popen(cmd, stdin=PIPE, stdout=PIPE)
+        grep_out, _ = grep.communicate(pip_list_out, timeout=15)
+
+        cmd = ["sed", "-E", "s/aiscalator[ \\t]+([0-9.]+)/\\1/"]
+        sed = Popen(cmd, stdin=PIPE, stdout=PIPE)
+        version, _ = sed.communicate(grep_out, timeout=15)
+        if version:
+            version = version.decode("utf-8")
+    except TimeoutExpired:
+        if pip_list:
+            pip_list.kill()
+        if grep:
+            grep.kill()
+        if sed:
+            sed.kill()
+    if version and version < __version__:
+        msg = "A new update of AIscalator (v" + version.strip("\n")
+        msg += ") is now available!\nShould we upgrade? Current is v"
+        msg += __version__
+        try:
+            cmd = ["pip", "install", "--upgrade", "aiscalator"]
+            pip_install = Popen(cmd)
+            pip_install.communicate(timeout=120)
+        except TimeoutExpired:
+            if pip_install:
+                pip_install.kill()

@@ -58,7 +58,7 @@ class LogRegexAnalyzer():
         """
         logger = logging.getLogger(__name__)
         for line in iter(pipe.readline, b''):  # b'\n'-separated lines
-            logger.log(self._log_level, b'\n' + line)
+            logger.log(self._log_level, line.decode("utf-8"))
             if self._pattern is not None:
                 match = search(self._pattern, line)
                 if match:
