@@ -5,7 +5,7 @@ coverage==5.2.1
 flake8==3.8.3
 isort==5.5.1
 jupytext==1.6.0
-pip==20.2.2
+pip==20.2.3
 pyhocon==0.3.55
 pylint==2.6.0
 pytest==6.0.1
