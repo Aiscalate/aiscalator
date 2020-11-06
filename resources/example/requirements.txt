@@ -1,2 +1,2 @@
 flake8==3.8.4
-papermill==2.2.0
+papermill==2.2.2
