@@ -1,5 +1,5 @@
 aiscalator==0.1.18
 jupyterhub==1.2.1
 jupyterlab==2.2.9
-jupytext==1.7.0
+jupytext==1.7.1
 notebook==6.1.5
