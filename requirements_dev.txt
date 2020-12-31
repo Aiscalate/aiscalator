@@ -3,7 +3,7 @@ bumpversion==0.6.0
 click==7.1.2
 coverage==5.3.1
 flake8==3.8.4
-isort==5.6.4
+isort==5.7.0
 jupytext==1.8.0
 pip==20.3.3
 pyhocon==0.3.57
