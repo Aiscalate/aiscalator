@@ -1,5 +1,5 @@
 flake8==3.8.4
-jupytext==1.10.2
+jupytext==1.10.3
 papermill==2.3.2
 pip==21.0.1
 nteract-scrapbook[all]==0.4.2
