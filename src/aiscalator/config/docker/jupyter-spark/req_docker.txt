@@ -1,4 +1,4 @@
-flake8==3.9.0
+flake8==3.9.1
 jupytext==1.11.1
 papermill==2.3.3
 pip==21.0.1
